@@ -1,0 +1,2520 @@
+!!2021/04/04
+if default_status_icons = 0:set_siconht = 54
+if default_wbanner = 0:set_weatherht = 72
+if default_menu_icons = 0:set_miconht = 54
+
+! init some vars
+if attr_xp_table_col_cnt = 0:
+	attr_xp_table_col_cnt    = 2
+	attr_xp_table_col_width  = 150
+	attr_xp_table_bar_height = 4
+end
+
+if skill_xp_table_col_cnt = 0:
+	skill_xp_table_col_cnt    = 2
+	skill_xp_table_col_width  = 120
+	skill_xp_table_bar_height = 2
+	$skill_xp_table_bar_color = 'grey'
+end
+
+
+gs 'outdoors', 'main'
+
+!!----------------image Extra messages, start--------------------------
+
+$stat_imgtool_msg=''
+$stat_imgextra_msg=''
+
+if Enable_showstatimg = 1:
+	!There are 3 display mode, with toobar / top / bottom, controlled by Enable_statimg_loc
+	if Enable_statimg_face = 0:
+		$stat_imgtool_msg += '<a href="exec:Enable_statimg_face = 1 & gs ''$menu_obnovit''">◇Face</a>'
+	else
+		$stat_imgtool_msg += '<a href="exec:Enable_statimg_face = 0 & gs ''$menu_obnovit''">◆Face</a>'
+		$img_temp = FUNC('$face_image')
+		if $img_temp ! null:  $stat_imgextra_msg += '<a href="exec:view ''<<$img_temp>>''"><img <<$set_statimgh>> src="<<$img_temp>>"></a> '
+	end
+
+	if Enable_statimg_body = 0:
+		$stat_imgtool_msg += ' <a href="exec:Enable_statimg_body = 1 & gs ''$menu_obnovit''">◇Body</a>'
+	else
+		$stat_imgtool_msg += ' <a href="exec:Enable_statimg_body = 0 & gs ''$menu_obnovit''">◆Body</a>'
+		$img_temp = FUNC('$body_image','body')
+		if $img_temp ! null:  $stat_imgextra_msg += '<a href="exec:view ''<<$img_temp>>''"><img <<$set_statimgh>> src="<<$img_temp>>"></a> '
+	end
+
+	if Enable_statimg_coat = 0:
+		$stat_imgtool_msg += ' <a href="exec:Enable_statimg_coat = 1 & gs ''$menu_obnovit''">◇Coat</a>'
+	else
+		$stat_imgtool_msg += ' <a href="exec:Enable_statimg_coat = 0 & gs ''$menu_obnovit''">◆Coat</a>'
+		$img_temp = FUNC('$body_image','coat')
+		if $img_temp ! null:  $stat_imgextra_msg += '<a href="exec:view ''<<$img_temp>>''"><img <<$set_statimgh>> src="<<$img_temp>>"></a> '
+	end
+
+	if Enable_statimg_cloth = 0:
+		$stat_imgtool_msg += ' <a href="exec:Enable_statimg_cloth = 1 & gs ''$menu_obnovit''">◇Clothes</a>'
+	else
+		$stat_imgtool_msg += ' <a href="exec:Enable_statimg_cloth = 0 & gs ''$menu_obnovit''">◆Clothes</a>'
+		$img_temp = FUNC('$body_image','clothes')
+		if $img_temp ! null:  $stat_imgextra_msg += '<a href="exec:view ''<<$img_temp>>''"><img <<$set_statimgh>> src="<<$img_temp>>"></a> '
+	end
+
+	if Enable_statimg_bra = 0:
+		$stat_imgtool_msg += ' <a href="exec:Enable_statimg_bra = 1 & gs ''$menu_obnovit''">◇Bra</a>'
+	else
+		$stat_imgtool_msg += ' <a href="exec:Enable_statimg_bra = 0 & gs ''$menu_obnovit''">◆Bra</a>'
+		$img_temp = FUNC('$body_image','bra')
+		if $img_temp ! null:  $stat_imgextra_msg += '<a href="exec:view ''<<$img_temp>>''"><img <<$set_statimgh>> src="<<$img_temp>>"></a> '
+	end
+
+	if Enable_statimg_panties = 0:
+		$stat_imgtool_msg += ' <a href="exec:Enable_statimg_panties = 1 & gs ''$menu_obnovit''">◇Panties</a>'
+	else
+		$stat_imgtool_msg += ' <a href="exec:Enable_statimg_panties = 0 & gs ''$menu_obnovit''">◆Panties</a>'
+		$img_temp = FUNC('$body_image','panties')
+		if $img_temp ! null:  $stat_imgextra_msg += '<a href="exec:view ''<<$img_temp>>''"><img <<$set_statimgh>> src="<<$img_temp>>"></a> '
+	end
+
+	if Enable_statimg_shoes = 0:
+		$stat_imgtool_msg += ' <a href="exec:Enable_statimg_shoes = 1 & gs ''$menu_obnovit''">◇Shoes</a>'
+	else
+		$stat_imgtool_msg += ' <a href="exec:Enable_statimg_shoes = 0 & gs ''$menu_obnovit''">◆Shoes</a>'
+		$img_temp = FUNC('$body_image','shoes')
+		if $img_temp ! null:  $stat_imgextra_msg += '<a href="exec:view ''<<$img_temp>>''"><img <<$set_statimgh>> src="<<$img_temp>>"></a> '
+	end
+	if $menu_loc ! '': $stat_imgtool_msg += ' <a href="exec:gs ''Cheatmenu_din'' & dynamic $cheatmenu[''setting'']">◎Settings</a>'
+end
+!!----------------image Extra messages, end --------------------------
+
+if Enable_statimg_loc = 1: $stat_msg = '<<$stat_imgtool_msg>><br><<$stat_imgextra_msg>><br><<$stat_msg>>'
+
+$stat_android = '<b><<$mid(100+hour,2,2)>>:<<$mid(100+minut,2,2)>></b>'
+
+$stat_msg += '<table><tr><td><a href="exec:msg ''<<$weather>>''"><<$weatherImage>></a></td><td><<$temperature>></td></tr></table>'
+
+if Enable_statfsize>0: $stat_msg = '<font size=<<Enable_statfsize>>><<$stat_msg>>'
+
+$stat_disable_msg = 'Menu is disabled for this event.'
+
+!$stat_msg += '<<$weather>><BR>'
+!pl '<<$weatherImage>>'
+if timeHidden = 0: $stat_msg += '<BR><<$stat_android>> <<$week[week]>> <<day>> <<$month>> <<year>>'
+$stat_android += '<<$week[week]>> <<day>>/<<month>>, <<money>> ₽, <a href="exec:clr & pl $stat_android">Status</a>'
+! $stat_android for short desc in android mode, $stat_msg for status bar.
+if mid($start_type,1,2) = 'sg' and SchoolAtestat ! 1 and $holyday ! '': $stat_msg += '<BR><<$holyday>>' & $stat_msg += '<BR>'
+if birthday = day and birthmonth = month: $stat_msg += '<BR><b>Today is your birthday.</b>' & $stat_msg += '<BR>'
+if telefon['UnreadSMS'] > 0: $stat_msg += '<BR><b>You have <<telefon[''UnreadSMS'']>> unread message(s).</b><BR>'
+
+!New icon based menu.
+if $start_type[1] ! 'nomagic':
+	$journal_tooltip = 'Spellbook & Journal'
+	$journalIcon = 'journal_magic.png'
+else
+	$journal_tooltip = 'Journal'
+	$journalIcon = 'journal_norm.png'
+end
+if menu_off = 0:
+	$menuBarTab = '<table><tr>'
+	$menuBarTab += '<td><a href="exec:killvar ''menu_page'' & gs ''obj_din'', ''description''"><img title="Character description" height = <<set_miconht>> src="images/system/icons/menu/icon_character.png"></a></td>'
+	$menuBarTab += '<td><a href="exec:killvar ''menu_page'' & gs ''obj_din'', ''face''"><img title="Looks (Face, body, clothing,...)"height = <<set_miconht>> src="images/system/icons/menu/icon_lookself.png"></a></td>'
+	if bag > 0: $menuBarTab += '<td><a href="exec:gs ''din_bad'', ''d_bag''"><img title="Your purse"height = <<set_miconht>> src="images/system/icons/menu/icon_purse.png"></a></td>'
+	$menuBarTab += '<td><a href="exec:gs ''telefon'',''Phone_menu''"><img title="Your phone" height = <<set_miconht>> src="images/system/icons/menu/<<iif(telefon[''UnreadSMS'']=0,''icon_phone.png'',''icon_phone_sms.gif'')>>"></a></td>'
+	$menuBarTab += '<td><a href="exec:gs ''obj_din'', ''records''"><img title="<<$journal_tooltip>>" height = <<set_miconht>> src="images/system/icons/menu/<<$journalIcon>>"></a></td>'
+	$menuBarTab += '<td><a href="exec:killvar ''menu_page'' & gs''$menu_setting''"><img title="Menu & Cheatmenu" height = <<set_miconht>> src="images/system/icons/menu/icon_menu.png"></a></td>'
+	$menuBarTab += '</tr></table>'
+	$stat_msg += func('cleanHTML',$menuBarTab)
+	killvar '$menuBarTab'
+elseif menu_off = 1:
+	$menuBarTab = '<table><tr>'
+	$menuBarTab += '<td><a href="exec:killvar ''menu_page'' & gs ''obj_din'', ''menu_disabled''"><img title="<<$stat_disable_msg>>" height = <<set_miconht>> src="images/system/icons/menu/icon_character.png"></a></td>'
+	$menuBarTab += '<td><a href="exec:killvar ''menu_page'' & gs ''obj_din'', ''menu_disabled''"><img title="<<$stat_disable_msg>>" height = <<set_miconht>> src="images/system/icons/menu/icon_lookself.png"></a></td>'
+	if bag > 0:
+		$menuBarTab += '<td><a href="exec:gs ''obj_din'', ''menu_disabled''"><img title="<<$stat_disable_msg>>" height = <<set_miconht>> src="images/system/icons/menu/icon_purse.png"></a></td>'
+	end
+	$menuBarTab += '<td><a href="exec:gs ''telefon'',''Phone_menu''"><img title="<<$stat_disable_msg>>" height = <<set_miconht>> src="images/system/icons/menu/<<iif(telefon[''UnreadSMS'']=0,''icon_phone.png'',''icon_phone_sms.gif'')>>"></a></td>'
+	$menuBarTab += '<td><a href="exec:gs ''obj_din'', ''menu_disabled''"><img title="<<$stat_disable_msg>>" height = <<set_miconht>> src="images/system/icons/menu/<<$journalIcon>>"></a></td>'
+	$menuBarTab += '<td><a href="exec:killvar ''menu_page'' & gs''obj_din'', ''menu_disabled''"><img title="<<$stat_disable_msg>>" height = <<set_miconht>> src="images/system/icons/menu/icon_menu.png"></a></td>'
+	$menuBarTab += '</tr></table>'
+	$stat_msg += func('cleanHTML',$menuBarTab)
+	killvar '$menuBarTab'
+end
+
+!!----------------- Money -------------------------------
+
+if bankAccount = 0 and stolmoney = 0:
+	$stat_msg += '<br>You have <b><<money>> ₽</b> in your '+iif(bag > 0, 'purse.', 'pockets.')
+else
+	$stat_msg += '<br>'+iif(bag > 0, 'Purse', 'Pockets')+': <b><<money>> ₽</b>'
+	if stolmoney > 0: $stat_msg += ', Drawer <b><<stolmoney>> ₽</b>'
+	if bankAccount = 1:
+		if karta >= 0:
+			$stat_msg += ', Bank: <b><<karta>> ₽</b>'
+		else
+			$stat_msg += '<font color="red"> Your bank account is overdrawn by <b><<karta>> ₽</b>!!</font>'
+		end
+	end
+end
+
+!!---------------- Messages for Icons/Texts (Start)--------------------------
+
+if cheatNoSweat = 0:
+	if pcs_sweat < 0:
+		pcs_sweat = 0
+	elseif pcs_sweat > 69:
+		pcs_sweat = 69
+	end
+
+	if pcs_sweat > 59:
+		$stat_sweat_msg = 'You are dripping wet from sweat and smell like a gym sock.'
+	elseif pcs_sweat > 49:
+		$stat_sweat_msg = 'You really stink.'
+	elseif pcs_sweat > 39:
+		$stat_sweat_msg = 'You stink.'
+	elseif pcs_sweat > 29:
+		$stat_sweat_msg = 'You are a little smelly.'
+	elseif pcs_sweat > 19:
+		$stat_sweat_msg = 'You''re sweating.'
+	elseif pcs_sweat > 9 and deodorant_on = 1:
+		$stat_sweat_msg = 'You feel fresh with your deodorant.'
+	elseif arrsize('sparrvol') = 0:
+		$stat_sweat_msg = 'You are sparkling clean.'
+	elseif deodorant_on = 1:
+		$stat_sweat_msg = 'You feel fresh with your deodorant on.'
+	else
+		$stat_sweat_msg = ''
+	end
+end
+
+if body_write > 1 and face_write = 0:
+	$stat_writing_msg = 'Your body is inscribed with derogatory graffiti.'
+elseif body_write = 1 and face_write = 0:
+	$stat_writing_msg = 'Your body has an obscene message written on it.'
+elseif body_write = 0 and face_write > 1:
+	$stat_writing_msg = 'Your face is covered in obscene writing.'
+elseif body_write = 0 and face_write = 1:
+	$stat_writing_msg = 'Your face has a humiliating label written on it.'
+elseif body_write > 0 and face_write > 0:
+	$stat_writing_msg = 'Your body and face are covered in obscene graffiti.'
+else
+	$stat_writing_msg = ''
+end
+
+if pcs_energy < 5:
+	$stat_hunger_msg = 'You feel faint from hunger, if you don''t have something to eat very soon, you will pass out.'
+	$stat_hunger_tooltip = 'You feel faint from hunger.'
+elseif pcs_energy < 10:
+	$stat_hunger_msg = 'You are starving, you really need to have something to eat.'
+	$stat_hunger_tooltip = 'You are starving.'
+elseif pcs_energy < 20:
+	$stat_hunger_msg = 'You are very hungry and struggle to concentrate on anything other than food.'
+	$stat_hunger_tooltip = 'You are very hungry.'
+elseif pcs_energy < 30:
+	$stat_hunger_msg = 'You feel peckish, and your thoughts sometimes drift towards food.'
+	$stat_hunger_tooltip = 'You feel peckish.'
+else
+	$stat_hunger_msg = ''
+end
+
+if pcs_hydra < 5:
+	$stat_thirst_msg = 'You feel light-headed, if you don''t have something to drink very soon, you will pass out.'
+	$stat_thirst_tooltip = 'You feel light-headed.'
+elseif pcs_hydra < 10:
+	$stat_thirst_msg = 'You are dehydrated, you really need to have something to drink.'
+	$stat_thirst_tooltip = 'You are dehydrated.'
+elseif pcs_hydra < 20:
+	$stat_thirst_msg = 'You are thirsty, and your dry throat is irritating and distracting you.'
+	$stat_thirst_tooltip = 'You are thirsty.'
+elseif pcs_hydra < 30:
+	$stat_thirst_msg = 'You feel a little thirsty, and your mouth is a little dry.'
+	$stat_thirst_tooltip = 'You feel a little thirsty.'
+else
+	$stat_thirst_msg = ''
+end
+
+if pcs_sleep < 5:
+	$stat_sleep_msg = 'You can''t keep your eyes open, if you don''t go to bed now, you will fall asleep right here.'
+	$stat_sleep_tooltip = 'You can''t keep your eyes open.'
+elseif pcs_sleep < 10:
+	$stat_sleep_msg = 'You are exhausted, you really need to go to bed soon.'
+	$stat_sleep_tooltip = 'You are exhausted.'
+elseif pcs_sleep < 20:
+	$stat_sleep_msg = 'You are tired and you are struggling to concentrate.'
+	$stat_sleep_tooltip = 'You are tired.'
+elseif pcs_sleep < 30:
+	$stat_sleep_msg = 'You feel a little tired.'
+	$stat_sleep_tooltip = 'You feel a little tired.'
+else
+	$stat_sleep_msg = ''
+end
+
+if pcs_condition['lack_of_sleep'] >= 20:
+	$stat_lack_of_sleep_msg = 'You are not getting enough sleep at all. This is severely inhibiting your ability to learn new things. You need to have a full nights rest to be better.'
+	$stat_lack_of_sleep_tooltip = 'You are not getting enough sleep at all.'
+elseif pcs_condition['lack_of_sleep'] >= 10:
+	$stat_lack_of_sleep_msg = 'You are not getting enough sleep. This has a large negative effect on your ability to learn new things. You need to sleep more maybe have a full nights rest.'
+	$stat_lack_of_sleep_tooltip = 'You are not getting enough sleep.'
+elseif pcs_condition['lack_of_sleep'] >= 5:
+	$stat_lack_of_sleep_msg = 'You are not getting enough sleep. This is modestly inhibiting your ability to learn new things. You need to sleep more.'
+	$stat_lack_of_sleep_tooltip = 'You are not getting enough sleep.'
+elseif pcs_condition['lack_of_sleep'] >= 2:
+	$stat_lack_of_sleep_msg = 'You are not sleeping as much as you should. This has a small effect on your ability to learn new things. You sleep more, or else you risk this getting worse.'
+	$stat_lack_of_sleep_tooltip = 'You are not sleeping as much as you should.'
+else
+	$stat_lack_of_sleep_msg = ''
+end
+
+if courthearing_date - 1 = daystart:
+	$stat_court_msg = 'You have a court hearing tomorrow between 07:00 and 11:00. The court is located in the city center of St. Petersburg.'
+	$stat_court_tooltip = 'Court hearing tomorrow (07:00 and 11:00).'
+elseif courthearing_date = daystart and hour < 11:
+	$stat_court_msg = 'You have a court hearing today between 07:00 and 11:00. The court is located in the city center of St. Petersburg.'
+	$stat_court_tooltip = 'Court hearing today (07:00 - 11:00).'
+else
+	$stat_court_msg = ''
+end
+
+killvar '$stat_hypno_msg'
+killvar '$stat_hypno_tooltip'
+if hypnoAddict > 0:
+	if hypnoWithdrawal = 2:
+		if missCum >= timeTresh:
+			$stat_hypno_msg = 'You want some sperm inside of you NOW! You have to talk to your therapist, immediately.'
+			$stat_hypno_tooltip = 'You have to talk to your therapist, immediately.'
+		else
+			$stat_hypno_msg = 'You need to talk to your therapist. You feel unbalanced without your sessions.'
+			$stat_hypno_tooltip = 'You feel unbalanced without your sessions.'
+		end
+	elseif hypnoWithdrawal = 1:
+		if missCum >= timeTresh:
+			$stat_hypno_msg = 'You really miss the feeling of sperm in your body, you are strangely craving it. You should talk to your therapist about it.'
+			$stat_hypno_tooltip = 'You should talk to your therapist.'
+		else
+			$stat_hypno_msg = 'You feel like talking to your therapist. You miss your sessions.'
+			$stat_hypno_tooltip = 'You miss your sessions.'
+		end
+	elseif missCum > 0:
+		$stat_hypno_msg = 'You miss the feeling of sperm in your body, and you feel moody.'
+		$stat_hypno_tooltip = 'You feel moody for some reason.'
+	end
+end
+if therapistday ! daystart and hypnoSchedule = 1:
+	if $stat_hypno_msg ! '': 
+		$stat_hypno_msg += '<br>'
+		$stat_hypno_tooltip += '<br>'
+	end
+	if hour < 18:
+		$stat_hypno_msg += 'You have a meeting scheduled with your therapist today at 18:00.'
+		$stat_hypno_tooltip += 'Session at 18:00!'
+	elseif hour < 19 and hour > 18:
+		$stat_hypno_msg += 'You have a meeting scheduled with your therapist right now.'
+		$stat_hypno_tooltip += 'Session right now!'
+	end
+end
+
+if frost > 0 and frost < 6:
+	$stat_frost_msg = 'You are a little chilly.'
+elseif frost > 0 and frost < 11:
+	$stat_frost_msg = 'You are cold.'
+elseif frost > 0:
+	$stat_frost_msg = 'You are freezing.'
+else
+	$stat_frost_msg = ''
+end
+
+if sick = 1:
+	$stat_sick_tooltip = 'You have a mild cold.'
+	$stat_sick_msg = 'This is not good, a tickle in the throat and a little runny nose.'
+elseif sick > 0 and sick < 24:
+	$stat_sick_tooltip = 'You have a cold.'
+	$stat_sick_msg = 'You have chills. You nose is running and throat is raw, you cough and sneeze - it looks like you got a cold.'
+elseif sick > 0 and sick < 48:
+	$stat_sick_tooltip = 'You have a serious cold.'
+	$stat_sick_msg = 'You have a fever. Your nose is clogged, it hurts to swallow - throat aches. You continually cough and sneeze - it looks like your cold is pretty bad.'
+elseif sick > 0 and sick < 72:
+	$stat_sick_tooltip = 'You have the flu.'
+	$stat_sick_msg = 'You have a high fever. You have a stuffy nose, sore head and throat, you''re coughing badly - it looks like you got a strong cold. Maybe it''s the flu.'
+elseif sick > 0:
+	$stat_sick_tooltip = 'You are seriously sick.'
+	$stat_sick_msg = 'You toss in the heat. You have a stuffy nose and headache and ache to the bone. Your throat is inflamed and very sore. You think you''re going to cough up a lung - it looks like you are seriously ill, or maybe it''s just a sore throat.'
+else
+	$stat_sick_msg = ''
+end
+
+if SchoolBlock = 0:
+	if week = 1:
+		$stat_school_schedule = ' Today you have the following lessons math, russian, literature, art, biology and P.E.'
+	elseif week = 2:
+		$stat_school_schedule = ' Today you have the following lessons english, geography, science, shop, computer, music.'
+	elseif week = 3:
+		$stat_school_schedule = ' Today you have the following lessons math, russian, biology, history, computer and P.E.'
+	elseif week = 4:
+		$stat_school_schedule = ' Today you have the following lessons english, geography, science, shop, computer and music.'
+	elseif week = 5:
+		$stat_school_schedule = ' Today you have the following lessons math, russian, literature, art, history and P.E.'
+	else
+		$stat_school_schedule = ''
+	end
+
+	if mid($start_type,1,2) = 'sg' and SchoolAtestat = 0 and kanikuli = 0 and week < 6 and hour < 9:
+		$stat_school_msg = 'You have to be at school before 07:55 if you don''t want to be late.'
+		$stat_school_tooltip = 'School starts at 07:55.'
+	elseif mid($start_type,1,2) = 'sg' and SchoolAtestat = 0 and week = 6 and hour < 9 and detention_set = 1 and SchoolAtestat = 0:
+		$stat_school_msg = 'You have detention this morning and must be at school before 09:00.'
+		$stat_school_tooltip = 'Detention starts at 09:00.'
+	else
+		$stat_school_msg = ''
+		$stat_school_icon_msg = ''
+	end
+	if $stat_school_msg ! '': $stat_school_icon_msg = $stat_school_msg + $stat_school_schedule
+end
+
+if university['student'] = 1:
+
+	if university['semester_week'] = -1:
+		$stat_uni_msg = 'Your next semester at the university starts next week. Classes will be Monday to Thursday starting at 9:00.'
+		$stat_uni_tooltip = 'Your next semester at the university starts next week.'
+	elseif university['semester_week'] > 0 and week < 5 and hour < 9 and uni_period['first'] ! daystart:
+		$stat_uni_msg = 'You have classes at the university today, the first class starts at 9:00.'
+		$stat_uni_tooltip = 'First class today is at 9:00.'
+	elseif university['semester_week'] > 0 and week < 5 and hour < 11 and uni_period['second'] ! daystart:
+		$stat_uni_msg = 'You have classes at the university today, the next class starts at 11:00.'
+		$stat_uni_tooltip = 'Next class today is at 11:00.'
+	elseif university['semester_week'] > 0 and week = 1 and (hour < 13 or (hour = 13 and minut < 15)) and uni_period['third'] ! daystart and $university['elective1'] ! '':
+		$stat_uni_msg = 'You have elective class at the university today, it starts at 13:15.'
+		$stat_uni_tooltip = 'Your elective clas today is at 13:15.'
+	elseif university['semester_week'] > 0 and week = 2 and (hour < 13 or (hour = 13 and minut < 15)) and uni_period['third'] ! daystart and $university['elective2'] ! '':
+		$stat_uni_msg = 'You have elective class at the university today, it starts at 13:15.'
+		$stat_uni_tooltip = 'Your elective clas today is at 13:15.'
+	elseif university['semester_week'] > 0 and week = 3 and (hour < 13 or (hour = 13 and minut < 15)) and uni_period['third'] ! daystart:
+		$stat_uni_msg = 'You have classes at the university today, the last class starts at 13:15.'
+		$stat_uni_tooltip = 'Last class today is at 13:15.'
+	elseif university['semester_week'] > 0 and week = 4 and (hour < 13 or (hour = 13 and minut < 15)) and uni_period['third'] ! daystart and $university['elective3'] ! '':
+		$stat_uni_msg = 'You have elective class at the university today, it starts at 13:15.'
+		$stat_uni_tooltip = 'Your elective class today is at 13:15.'
+	elseif university['exam_week'] = 1 and week < 4:
+		$stat_uni_msg = 'You have exams at the university this week and the next . Your first exam is Thursdy this week at 9:00.'
+		$stat_uni_tooltip = 'First week of exams.'
+	elseif university['exam_week'] = 1 and week = 4 and hour < 9:
+		$stat_uni_msg = 'You have exams at the university this week and the next . Your first exam is today 9:00.'
+		$stat_uni_tooltip = 'First week of exams.'
+	elseif university['exam_week'] = 1:
+		$stat_uni_msg = 'You have no more exams this week. Your next exam will be Tuesday next week at 9:00.'
+		$stat_uni_tooltip = 'First week of exams.'
+	elseif university['exam_week'] = 2 and week < 2:
+		$stat_uni_msg = 'This is the last week of exams at the university this semester. Your next exam will be Tuesday this week at 9:00.'
+		$stat_uni_tooltip = 'Second week of exams.'
+	elseif university['exam_week'] = 2 and week < 2 and hour < 9:
+		$stat_uni_msg = 'This is the last week of exams at the university this semester. Your next exam will be today at 9:00.'
+		$stat_uni_tooltip = 'Second week of exams.'
+	elseif university['exam_week'] = 2 and week < 4:
+		$stat_uni_msg = 'This is the last week of exams at the university this semester. Your last exam will be Thursday this week at 9:00.'
+		$stat_uni_tooltip = 'Second week of exams.'
+	elseif university['exam_week'] = 2 and week < 4 and hour < 9:
+		$stat_uni_msg = 'This is the last week of exams at the university this semester. Your last exam will be today at 9:00.'
+		$stat_uni_tooltip = 'Second week of exams.'
+	elseif university['exam_week'] = 2:
+		$stat_uni_msg = 'This is the last week of exams at the university this semester. All your exams are over. Now is just waiting to get the result on Monday.'
+		$stat_uni_tooltip = 'Second week of exams.'
+	elseif university['enrolled_in_semester'] = university['semester_passed'] and university['semester_passed'] < 8:
+		$stat_uni_msg = 'Your need to register for your next semester before it starts at the university administration.'
+		$stat_uni_tooltip = 'Your need to register for your next semester.'
+	else
+		$stat_uni_msg = ''
+		$stat_uni_icon_msg = ''
+	end
+	if $stat_uni_msg ! '': $stat_uni_icon_msg = $stat_uni_msg
+end
+
+if ml_guitarlesson['nextlesson'] = daystart and hour < 15:
+	$stat_musiclesson_msg = 'You have a guitar lesson scheduled for 1500 at the Community Hall.'
+	$stat_musiclesson_tip = 'Guitar lesson day.'
+else
+	$stat_musiclesson_msg = ''
+	$stat_musiclesson_tip = ''
+end
+
+if nerd_game['game_day'] = daystart and hour < 20:
+    $stat_game_night_msg = 'Game night starts tonight at 20:00 at the Community Center'
+	$stat_game_night_tooltip = 'Nerd Game Night'
+else
+    $stat_game_night_msg = ''
+	$stat_game_night_tooltip = ''
+end
+
+$stat_bra_msg = ''
+$stat_bra_text = ''
+
+if $clothingworntype ! 'nude':
+	if PCloThinness = 6:
+		if PCloswimwear = 1:
+			$stat_bra_msg = 'Your breasts are completely visible through your transparent swimsuit.'
+			$stat_bra_text = '<BR><font color = #FF00FF><<$stat_bra_msg>></font>'
+		elseif $braworntype = 'exhibitionist':
+			$stat_bra_msg = 'Your breasts are clearly visible through your transparent bra and top.'
+			$stat_bra_text = '<BR><font color = #FF00FF><<$stat_bra_msg>></font>'
+		elseif $braworntype ! 'none':
+			$stat_bra_msg = 'Your bra is clearly showing through your transparent top.'
+			$stat_bra_text = '<BR><font color = #FF00FF><<$stat_bra_msg>></font>'
+		else
+			$stat_bra_msg = 'Your breasts are fully on display through your transparent top.'
+			$stat_bra_text = '<BR><font color = #FF00FF><<$stat_bra_msg>></font>'
+		end
+	elseif PCloThinness = 5:
+		if PCloswimwear = 1:
+			$stat_bra_msg = 'The shape of your nipples is completely visible through your swimsuit.'
+			$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+		elseif $braworntype = 'exhibitionist':
+			$stat_bra_msg = 'The shape of your nipples is completely visible through your thin top and bra.'
+			$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+		elseif $braworntype ! 'none':
+			if PCloDress = 1:
+				$stat_bra_msg = 'The shape and color of your bra is visible through your dress.'
+				$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+			else
+				$stat_bra_msg = 'The shape and color of your bra is visible through your top.'
+				$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+			end
+		elseif $braworntype = 'none' and pcs_horny >= 50:
+			$stat_bra_msg = 'Your aroused nipples are hard and showing through your top.'
+			$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+		elseif $braworntype = 'none' and temper < 14:
+			$stat_bra_msg = 'Your nipples are freezing cold and visibly hard through your top.'
+			$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+		elseif PCloBra = 1:
+			$stat_bra_msg = 'Your top is replacing a bra.'
+			$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+		elseif $braworntype = 'none':
+			if PCloDress = 1:
+				$stat_bra_msg = 'The shape of your nipples is completely visible through your thin dress.'
+				$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+			else
+				$stat_bra_msg = 'The shape of your nipples is completely visible through your thin top.'
+				$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+			end
+		end
+	elseif PCloThinness = 4:
+		if PCloswimwear = 1:
+			$stat_bra_msg = 'Your nipples are slightly poking through your swimsuit.'
+			$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+		elseif $braworntype = 'exhibitionist':
+			$stat_bra_msg = 'You are wearing such a thin bra that your nipples are still being faintly outlined through your top.'
+			$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+		elseif $braworntype ! 'none':
+			$stat_bra_msg = 'Your bra is being outlined through your top.'
+		elseif $braworntype = 'none' and pcs_horny >= 50:
+			$stat_bra_msg = 'Your aroused nipples are visibly hard.'
+			$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+		elseif $braworntype = 'none' and temper < 14:
+			$stat_bra_msg = 'Your nipples are freezing cold and visibly hard through your top.'
+			$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+		elseif PCloBra = 1:
+			$stat_bra_msg = 'Your top is replacing a bra.'
+			$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+		elseif $braworntype = 'none':
+			if CloDress = 1:
+				$stat_bra_msg = 'The shape of your nipples is faintly visible through your dress.'
+				$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+			else
+				$stat_bra_msg = 'The shape of your nipples is faintly visible through your top.'
+				$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+			end
+		end
+	elseif PCloBra = 1:
+			$stat_bra_msg = 'Your top is replacing a bra.'
+			$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+	elseif $braworntype = 'none' and pcs_horny >= 50:
+		$stat_bra_msg = 'You are not wearing a bra and your aroused nipples are rock hard.'
+		$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+	elseif $braworntype = 'none' and temper < 14:
+		$stat_bra_msg = 'You are not wearing a bra and your nipples are freezing cold.'
+		$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+	elseif $braworntype = 'none':
+		if pcs_cupsize <= 5:
+			$stat_bra_msg = 'You are not wearing a bra and your flat chest feels comfortable against the inside of your clothes.'
+!!			$titsize = 'AA cup'
+		elseif pcs_cupsize <= 10:
+			$stat_bra_msg = 'You are not wearing a bra and your modest breasts ever so slightly bounce as you walk.'
+!!			$titsize = 'A cup'
+		elseif pcs_cupsize <= 15:
+			$stat_bra_msg = 'You are not wearing a bra and your pert breasts jiggle softly as you walk.'
+!!			$titsize = 'B cup'
+		elseif pcs_cupsize <= 20:
+			$stat_bra_msg = 'You are not wearing a bra and your breasts bounce with every step.'
+!!			$titsize = 'C cup'
+		elseif pcs_cupsize <= 30:
+			$stat_bra_msg = 'You are not wearing a bra and your large breasts bounce with every step.'
+!!			$titsize = 'E cup'
+		else
+			$stat_bra_msg = 'You are not wearing a bra and your enormous breasts bounce dramatically with every step.'
+!!			$titsize = 'K cup'
+		end
+		$stat_bra_text = '<BR><font color = #AB052A><<$stat_bra_msg>></font>'
+	end
+end
+
+$stat_panty_msg = ''
+$stat_panty_text = ''
+
+if $pantyworntype = 'none' and PCloswimwear = 0 and PCloPanties = 0:
+	if PCloStyle = 4:
+		$stat_panty_msg = 'You are not wearing panties, but you are dressed as a hooker, so that''s hardly surprising.'
+		$stat_panty_text = '<BR><font color= #FF00FF><<$stat_panty_msg>></font>'
+	elseif PCloBimbo = 1 or bimbolevel > 0 and PCloSkirt > 3 and cheatBimbo = 0:
+		$stat_panty_msg = 'You like, totally forgot to put on any panties. You are such a bimbo.'
+		$stat_panty_text = '<BR><font color = #FF00FF><<$stat_panty_msg>></font>'
+	elseif PCloSkirt > 3 and trait['commando_lvl'] > 0:
+		$stat_panty_msg = 'You feel liberated not wearing panties as your naked ass flashes from under your short skirt.'
+		$stat_panty_text = '<BR><font color=#0064FF><<$stat_panty_msg>></font>'
+	elseif PCloSkirt > 3 and trait['commando_lvl'] < 1:
+		if pcs_inhib <= 50:
+			$stat_panty_msg = 'Your face is flushed with shame. You are not wearing panties, and your naked ass flashes from under your short skirt.'
+		else
+			$stat_panty_msg = 'It feels odd and a bit uncomfortable not wearing panties with such a short skirt. Your naked ass flashes from under it.'
+		end
+		$stat_panty_text = '<BR><b><font color="red"><<$stat_panty_msg>></font></b>'
+	elseif PCloPants > 0 and trait['commando_lvl'] = 2:
+		$stat_panty_msg = 'You are comfortably commando, not bothered at all by your bare pussy rubbing against the inside of your pants.'
+	elseif PCloPants > 0 and trait['commando_lvl'] = 3:
+		$stat_panty_msg = 'You are happily commando, feeling very comfortable with your ass and pussy touching the inside of your pants.'
+	elseif PCloPants > 0 and $braworntype = 'none':
+		$stat_panty_msg = 'You aren''t wearing underwear, and your bare pussy is rubbing against your clothing.'
+		$stat_panty_text = '<BR><b><font color="red"><<$stat_panty_msg>></font></b>'
+	elseif PCloPants > 0 and $braworntype ! 'none':
+		$stat_panty_msg = 'You aren''t wearing panties, and your bare pussy is rubbing against your clothing.'
+		$stat_panty_text = '<BR><b><font color="red"><<$stat_panty_msg>></font></b>'
+	elseif towel = 1:
+		$stat_panty_msg = 'Your naked body is covered only by a short towel.'
+		$stat_panty_text = '<BR><font color = #AB052A><<$stat_panty_msg>></font>'
+	elseif $clothingworntype ! 'nude' and trait['commando_lvl'] < 1:
+		$stat_panty_msg = 'You are not wearing panties and it makes you uncomfortable.'
+		$stat_panty_text = '<BR><font color = #AB052A><<$stat_panty_msg>></font>'
+	elseif $clothingworntype ! 'nude':
+		$stat_panty_msg = 'You are not wearing panties.'
+	end
+elseif $pantyworntype = 'exhibitionist' and PCloswimwear = 0:
+	if PCloStyle = 4:
+		$stat_panty_msg = 'You are wearing see-through panties, but you are dressed as a hooker, so that''s hardly surprising.'
+		$stat_panty_text = '<BR><font color= #FF00FF><<$stat_panty_msg>></font>'
+	elseif PCloSkirt > 3 and pcs_inhib > 50:
+		$stat_panty_msg = 'Your ass is clearly visible through your panties, is flashing from under your short skirt.'
+		$stat_panty_text = '<BR><font color=#0064FF><<$stat_panty_msg>></font>'
+	elseif PCloSkirt > 3 and pcs_inhib <= 50:
+		$stat_panty_msg = 'Your face is flushed with shame. You are wearing panties so thin they leave your ass clearly visible as it flashes from under your short skirt.'
+		$stat_panty_text = '<BR><b><font color="red"><<$stat_panty_msg>></font></b>'
+	elseif PCloPants > 0 and trait['commando_lvl'] = 3:
+		$stat_panty_msg = 'You wearing transparent panties, but that you''re wearing any at all is bringing down your mood.'
+		$stat_panty_text = '<BR><b><font color="red"><<$stat_panty_msg>></font></b>'
+	end
+elseif $pantyworntype ! 'none' and trait['commando_lvl'] = 3:
+	$stat_panty_msg = 'You wearing panties and it makes you uncomfortable.'
+	$stat_panty_text = '<BR><b><font color="red"><<$stat_panty_msg>></font></b>'
+end
+
+$stat_clothes_msg = ''
+$stat_clothes_text = ''
+
+if $clothingworntype = 'nude':
+	if $pantyworntype = 'exhibitionist':
+		if $braworntype = 'none':
+			$stat_clothes_text = '<BR><font color = #AB052A>You are only wearing your see-through panties, and your boobs sway invitingly as you walk.</font>'
+			$stat_clothes_tooltip = 'You are wearing your see-through panties.'
+			$stat_clothes_msg = 'You are only wearing your see-through panties, and your boobs sway invitingly as you walk.'
+		elseif $braworntype = 'exhibitionist':
+			$stat_clothes_text = '<BR><font color = #AB052A>You are only wearing your see-through underwear.</font>'
+			$stat_clothes_tooltip = 'You are wearing your see-through underwear.'
+			$stat_clothes_msg = 'You are only wearing your see-through underwear.'
+		else
+			$stat_clothes_text = '<BR><font color = #AB052A>You are only wearing your see-through panties and bra.</font>'
+			$stat_clothes_tooltip = 'You are wearing your see-through panties and bra.'
+			$stat_clothes_msg = 'You are only wearing your see-through panties and bra.'
+		end
+	elseif $pantyworntype ! 'none':
+		if $braworntype = 'none':
+			$stat_clothes_text = '<BR><font color = #AB052A>You are only wearing your panties, and your boobs sway invitingly as you walk.</font>'
+			$stat_clothes_tooltip = 'You are wearing your panties.'
+			$stat_clothes_msg = 'You are only wearing your panties, and your boobs sway invitingly as you walk.'
+		elseif $braworntype = 'exhibitionist':
+			$stat_clothes_text = '<BR><font color = #AB052A>You are only wearing your see-through bra and panties.</font>'
+			$stat_clothes_tooltip = 'You are wearing your see-through bra and panties.'
+			$stat_clothes_msg = 'You are only wearing your see-through bra and panties.'
+		else
+			$stat_clothes_text = '<BR><font color = #AB052A>You are only wearing your underwear.</font>'
+			$stat_clothes_tooltip = 'You are wearing your underwear.'
+			$stat_clothes_msg = 'You are wearing your underwear.'
+		end
+	else
+		if $braworntype ! 'none':
+			$stat_clothes_text = '<BR><font color = #AB052A>You are only wearing your bra, leaving your pussy and ass completely exposed.</font>'
+			$stat_clothes_tooltip = 'You are only wearing your bra.'
+			$stat_clothes_msg = 'You are only wearing your bra, leaving your pussy and ass completely exposed.'
+		else
+			if pcs_inhib < 5:
+				$stat_clothes_text = '<BR><b><font color = #AB052A>You are completely naked, and it makes you feel nervous and ashamed.</font></b>'
+				$stat_clothes_tooltip = 'You don''t like being naked.'
+				$stat_clothes_msg = 'You are completely naked, and it makes you feel nervous and ashamed.'
+			elseif pcs_inhib < 20:
+				$stat_clothes_text = '<BR><b><font color = orange>You are completely naked. You''re not too comfortable with nudity but it is a little exciting.</font></b>'
+				$stat_clothes_tooltip = 'It''s a bit exciting to be naked.'
+				$stat_clothes_msg = 'You are completely naked. You''re not too comfortable with nudity, but it is a little exciting.'
+			elseif pcs_inhib >= 90:
+				$stat_clothes_text = '<BR><b><font color=#0064FF>You are completely naked, which is far better than having to wear clothes.</font></b>'
+				$stat_clothes_tooltip = 'Being naked is far better than wearing clothes.'
+				$stat_clothes_msg = 'You are completely naked, which is far better than having to wear clothes.'
+			else
+				$stat_clothes_text = '<BR><b><font color = #FF00FF>You are completely naked. It''s exciting, and you feel tingly inside.</font></b>'
+				$stat_clothes_tooltip = 'It''s exciting to be naked.'
+				$stat_clothes_msg = 'You are completely naked. It''s exciting, and you feel tingly inside.'
+			end
+		end
+	end
+	$stat_clothes_style = 'nude'
+elseif $clothingworntype = 'danilovich_outfits':
+	if PCloBimbo = 1 and cheatBimbo = 0:
+		$stat_clothes_text = '<BR><font color = #FF00FF>You are wearing a bimbo outfit</font>'
+		$stat_clothes_msg = 'You are wearing a gym outfit a bimbo would wear'
+		$stat_clothes_tooltip = 'Bimbo gym outfit.'
+		$stat_clothes_style = 'exercise_b'
+	elseif PCloInhibit >= 30:
+		$stat_clothes_msg = 'You''re wearing a revealing gym outfit.'
+		$stat_clothes_tooltip = 'Revealing gym outfit.'
+		$stat_clothes_style = 'exercise_s'
+	elseif PCloInhibit >= 20:
+		$stat_clothes_msg = 'You''re wearing a slightly revealing gym outfit.'
+		$stat_clothes_tooltip = 'Slightly revealing gym outfit.'
+		$stat_clothes_style = 'exercise_s'
+	else
+		$stat_clothes_msg = 'You''re wearing a normal gym outfit.'
+		$stat_clothes_tooltip = 'Normal gym outfit.'
+		$stat_clothes_style = 'exercise'
+	end
+elseif PCloswimwear = 1:
+	if (PCloInhibit >= 50 or PCloThinness = 6) and PCloBimbo = 1 and cheatBimbo = 0:
+		$stat_clothes_text = '<BR><font color = #FF00FF>You are wearing a bimbo outfit</font>'
+		$stat_clothes_msg = 'You''re wearing an exhibitionist swimsuit a bimbo would wear.'
+		$stat_clothes_tooltip = 'Exhibitionist/Bimbo swimsuit.'
+		$stat_clothes_style = 'swimsuit_eb'
+	elseif (PCloInhibit >= 50 or PCloThinness = 6) and (PCloBimbo = 0 or cheatBimbo = 1):
+		$stat_clothes_msg = 'You are wearing an exhibitionist swimsuit.'
+		$stat_clothes_tooltip = 'Exhibitionist swimsuit.'
+		$stat_clothes_style = 'swimsuit_e'
+	elseif PCloBimbo = 1 and cheatBimbo = 0:
+		$stat_clothes_text = '<BR><font color = #FF00FF>You are wearing a bimbo outfit</font>'
+		$stat_clothes_msg = 'You are wearing a swimsuit a bimbo would wear.'
+		$stat_clothes_tooltip = 'Bimbo swimsuit.'
+		$stat_clothes_style = 'swimsuit_b'
+	elseif PCloInhibit >= 40:
+		$stat_clothes_msg = 'You''re wearing a very revealing swimsuit.'
+		$stat_clothes_tooltip = 'Very revealing swimsuit.'
+		$stat_clothes_style = 'swimsuit_s'
+	elseif PCloInhibit >= 30:
+		$stat_clothes_msg = 'You''re wearing a revealing swimsuit.'
+		$stat_clothes_tooltip = 'Revealing swimsuit.'
+		$stat_clothes_style = 'swimsuit_s'
+	elseif PCloInhibit >= 25:
+		$stat_clothes_msg = 'You''re wearing a slightly revealing swimsuit.'
+		$stat_clothes_tooltip = 'Slightly revealing swimsuit.'
+		$stat_clothes_style = 'swimsuit_s'
+	else
+		$stat_clothes_msg = 'You''re wearing a normal swimsuit.'
+		$stat_clothes_tooltip = 'Normal swimsuit.'
+		$stat_clothes_style = 'swimsuit'
+	end
+elseif $clothingworntype = 'gm_office':
+	if PCloStyle = 4 and PCloBimbo = 1 and cheatBimbo = 0:
+		$stat_clothes_text = '<BR><font color = #FF00FF>You are wearing a bimbo outfit</font>'
+		$stat_clothes_msg = 'You''re wearing an office dress a bimbo or a prostitute would wear'
+		$stat_clothes_tooltip = 'Prostitute/Bimbo office dress.'
+		$stat_clothes_style = 'office_pb'
+	elseif PCloStyle = 4 and (PCloBimbo = 0 or cheatBimbo = 1):
+		$stat_clothes_msg = 'You''re wearing an office dress a prostitute would wear.'
+		$stat_clothes_tooltip = 'Prostitute office dress.'
+		$stat_clothes_style = 'office_p'
+	elseif (PCloInhibit >= 40 or PCloThinness = 6) and PCloBimbo = 1 and cheatBimbo = 0:
+		$stat_clothes_text = '<BR><font color = #FF00FF>You are wearing a bimbo outfit</font>'
+		$stat_clothes_msg = 'You''re wearing an exhibitionist office dress a bimbo would wear'
+		$stat_clothes_tooltip = 'Exhibitionist/Bimbo office office dress.'
+		$stat_clothes_style = 'office_eb'
+	elseif (PCloInhibit >= 40 or PCloThinness = 6) and (PCloBimbo = 0 or cheatBimbo = 1):
+		$stat_clothes_msg = 'You are wearing an exhibitionist office dress.'
+		$stat_clothes_tooltip = 'Exhibitionist office dress.'
+		$stat_clothes_style = 'office_e'
+	elseif PCloBimbo = 1 and cheatBimbo = 0:
+		$stat_clothes_text = '<BR><font color = #FF00FF>You are wearing a bimbo outfit</font>'
+		$stat_clothes_msg = 'You are wearing an office dress a bimbo would wear'
+		$stat_clothes_tooltip = 'Bimbo office dress.'
+		$stat_clothes_style = 'office_b'
+	elseif PCloInhibit >= 30:
+		$stat_clothes_msg = 'You''re wearing a very revealing office dress.'
+		$stat_clothes_tooltip = 'Very revealing office dress.'
+		$stat_clothes_style = 'office_s'
+	elseif PCloInhibit >= 25:
+		$stat_clothes_msg = 'You''re wearing a revealing office dress.'
+		$stat_clothes_tooltip = 'Revealing office dress.'
+		$stat_clothes_style = 'office_s'
+	elseif PCloInhibit >= 20:
+		$stat_clothes_msg = 'You''re wearing a slightly revealing office dress.'
+		$stat_clothes_tooltip = 'Slightly revealing office dress.'
+		$stat_clothes_style = 'office_s'
+	else
+		$stat_clothes_msg = 'You''re wearing a normal office dress.'
+		$stat_clothes_tooltip = 'Normal office dress.'
+		$stat_clothes_style = 'office'
+	end
+elseif PCloStyle2 = 4:
+	if PCloStyle = 4 and PCloBimbo = 1 and cheatBimbo = 0:
+		$stat_clothes_text = '<BR><font color = #FF00FF>You are wearing a bimbo outfit</font>'
+		$stat_clothes_msg = 'You''re wearing a school uniform a prostitute or bimbo would wear.'
+		$stat_clothes_tooltip = 'Prostitute/Bimbo school uniform'
+		$stat_clothes_style = 'uniform_pb'
+	elseif PCloStyle = 4 and (PCloBimbo = 0 or cheatBimbo = 1):
+		$stat_clothes_msg = 'You''re wearing a school uniform a prostitute would wear.'
+		$stat_clothes_tooltip = 'Prostitute school uniform.'
+		$stat_clothes_style = 'uniform_p'
+	elseif PCloBimbo = 1 and cheatBimbo = 0:
+		$stat_clothes_text = '<BR><font color = #FF00FF>You are wearing a bimbo outfit</font>'
+		$stat_clothes_msg = 'You''re wearing a school uniform a bimbo would wear.'
+		$stat_clothes_tooltip = 'Bimbo school uniform.'
+		$stat_clothes_style = 'uniform_b'
+	elseif PCloInhibit >= 30:
+		$stat_clothes_msg = 'You''re wearing a very revealing school uniform.'
+		$stat_clothes_tooltip = 'Very revealing school uniform.'
+		$stat_clothes_style = 'uniform_s'
+	elseif PCloInhibit >= 25:
+		$stat_clothes_msg = 'You''re wearing a revealing school uniform.'
+		$stat_clothes_tooltip = 'Revealing school uniform.'
+		$stat_clothes_style = 'uniform_s'
+	elseif PCloInhibit >= 20:
+		$stat_clothes_msg = 'You''re wearing a slightly revealing school uniform.'
+		$stat_clothes_tooltip = 'Slightly revealing school uniform.'
+		$stat_clothes_style = 'uniform_s'
+	else
+		$stat_clothes_msg = 'You''re wearing a normal school uniform.'
+		$stat_clothes_tooltip = 'Normal school uniform.'
+		$stat_clothes_style = 'uniform'
+	end
+elseif $clothingworntype = 'misc_outfits' and clothingwornnumber = '1':
+	$stat_clothes_text = '<BR><b><font color = "yellow">You are wearing an old hessian sack the hunters gave you.</font></b>'
+	$stat_clothes_tooltip = 'You''re wearing a hessian sack.'
+	$stat_clothes_msg = 'You are wearing an old hessian sack the hunters gave you.'
+	$stat_clothes_style = 'clothes'
+else
+	if PCloStyle = 4 and PCloBimbo = 1 and cheatBimbo = 0:
+		$stat_clothes_text = '<BR><font color = #FF00FF>You are wearing a bimbo, prostitute outfit</font>'
+		$stat_clothes_msg = 'You''re wearing an outfit a bimbo, prostitute would wear.'
+		$stat_clothes_tooltip = 'Prostitute/Bimbo outfit.'
+		$stat_clothes_style = 'clothes_pb'
+	elseif PCloStyle = 4:
+		$stat_clothes_msg = 'You''re wearing an outfit a prostitute would wear.'
+		$stat_clothes_tooltip = 'Prostitute outfit.'
+		$stat_clothes_style = 'clothes_p'
+	elseif (PCloInhibit >= 40 or PCloThinness = 6) and PCloBimbo = 1 and cheatBimbo = 0:
+		$stat_clothes_text = '<BR><font color = #FF00FF>You are wearing a bimbo, exhibitionist outfit</font>'
+		$stat_clothes_msg = 'You''re wearing exhibitionist clothes a bimbo would wear.'
+		$stat_clothes_tooltip = 'Exhibitionist/Bimbo outfit.'
+		$stat_clothes_style = 'clothes_eb'
+	elseif (PCloInhibit >= 40 or PCloThinness = 6):
+		$stat_clothes_msg = 'You are wearing exhibitionist clothes.'
+		$stat_clothes_tooltip = 'Exhibitionist outfit.'
+		$stat_clothes_style = 'clothes_e'
+	elseif PCloBimbo = 1 and cheatBimbo = 0:
+		$stat_clothes_text = '<BR><font color = #FF00FF>You are wearing a bimbo outfit</font>'
+		$stat_clothes_msg = 'You are wearing bimbo clothes.'
+		$stat_clothes_tooltip = 'Bimbo outfit.'
+		$stat_clothes_style = 'clothes_b'
+	elseif PCloInhibit >= 30:
+		$stat_clothes_msg = 'You''re wearing very revealing clothes.'
+		$stat_clothes_tooltip = 'Very revealing outfit.'
+		$stat_clothes_style = 'clothes_s'
+	elseif PCloInhibit >= 25:
+		$stat_clothes_msg = 'You''re wearing revealing clothes.'
+		$stat_clothes_tooltip = 'Revealing outfit.'
+		$stat_clothes_style = 'clothes_s'
+	elseif PCloInhibit >= 20:
+		$stat_clothes_msg = 'You''re wearing slightly revealing clothes.'
+		$stat_clothes_tooltip = 'Slightly revealing outfit.'
+		$stat_clothes_style = 'clothes_s'
+	else
+		$stat_clothes_msg = 'You''re wearing normal clothes.'
+		$stat_clothes_tooltip = 'Normal outfit.'
+		$stat_clothes_style = 'clothes'
+	end
+end
+
+if PCloBimbo = 1:
+	if ShoStyle = 2:
+		if pcs_makeup = 6:
+			$stat_clothes_text += '<font color = #FF00FF>, bimbo shoes and bimbo make up</font>'
+			$stat_clothes_text += '<BR><font color = #FF00FF>You look like a bimbo</font>'
+			bimbo_flag = 1
+		else
+			$stat_clothes_text += '<font color = #FF00FF> and bimbo shoes</font>'
+		end
+	end
+end
+
+$stat_img_temp = func('$body_image','clothes')
+$stat_clothes_msg += '<br><img src="<<$stat_img_temp>>">'
+
+gs 'cum_manage', 'cum_stat_display'
+
+$stat_bfgf_msg_0 = ''
+$stat_bfgf_tooltip_0 = ''
+$stat_bfgf_msg_1 = ''
+$stat_bfgf_tooltip_1 = ''
+$stat_bfgf_msg_2 = ''
+$stat_bfgf_tooltip_2 = ''
+
+if hour < meethour[0] and svidanie[0] = 1:
+	$stat_bfgf_msg_0 = '<<$loverdesc[0]>> will be waiting for you near <<$streetev_home>> at <<meethour[0]>>:00.'
+	$stat_bfgf_tooltip_0 = 'Your date with <<$loverdesc[0]>> starts at <<meethour[0]>>:00 near <<$streetev_home>>.'
+elseif hour = meethour[0] and svidanie[0] = 1:
+	$stat_bfgf_msg_0 = '<<$loverdesc[0]>> is waiting for you by <<$streetev_home>>.'
+	$stat_bfgf_tooltip_0 = '<<$loverdesc[0]>> is waiting near <<$streetev_home>>.'
+elseif meetday[0] < daystart and svidanie[0] = 1:
+	pcs_lovers_rel[0] -= 10 & svidanie[0] = 0
+end
+
+if hour < meethour[1] and svidanie[1] = 1:
+	$stat_bfgf_msg_1 = '<<$loverdesc[1]>> will be waiting for you near <<$streetev_home>> at <<meethour[1]>>:00.'
+	$stat_bfgf_tooltip_1 = 'Your date with <<$loverdesc[1]>> starts at <<meethour[1]>>:00 near <<$streetev_home>>.'
+elseif hour = meethour[1] and svidanie[1] = 1:
+	$stat_bfgf_msg_1 = '<<$loverdesc[1]>> is waiting for you by <<$streetev_home>>.'
+	$stat_bfgf_tooltip_1 = '<<$loverdesc[1]>> is waiting near <<$streetev_home>>.'
+elseif meetday[1] < daystart and svidanie[1] = 1:
+	pcs_lovers_rel[1] -= 10 & svidanie[1] = 0
+end
+
+if hour < meethour[2] and svidanie[2] = 1:
+	$stat_bfgf_msg_2 = '<<$loverdesc[2]>> will be waiting for you near <<$streetev_home>> at <<meethour[2]>>:00.'
+	$stat_bfgf_tooltip_2 = 'Your date starts at <<meethour[2]>>:00 near <<$streetev_home>>.'
+elseif hour = meethour[2] and svidanie[2] = 1:
+	$stat_bfgf_msg_2 = '<<$loverdesc[2]>> is waiting for you by <<$streetev_home>>.'
+	$stat_bfgf_tooltip_2 = '<<$loverdesc[2]>> is waiting near <<$streetev_home>>.'
+elseif meetday[2] < daystart and svidanie[2] = 1:
+	pcs_lovers_rel[2] -= 10 & svidanie[2] = 0
+end
+
+!!---------------- Messages for Icons/Texts (End)----------------------------
+
+if pornstack > 0:
+	porndays = 0
+	:pfilmtime
+	if porndays < 200 and pfilmday[porndays] = 0: porndays += 1 & jump 'pfilmtime'
+end
+
+!!-----------------Status Icons (Start)------------------
+
+if cheatStatusIcons = 0:
+
+	$stat_msg += '<br><br>'
+
+	!!Row 1: Appearance
+
+	$statusIconBarTab = '<table><tr>'
+
+	$stat_hotcat_msg = 'People would rate your appearance as a <<hotcat>> out of 10.<br><img src="<<func(''$face_image'')>>">'
+	$statusIconBarTab += '<td><a href="exec:msg $stat_hotcat_msg"><img title="You are a <<hotcat>> out of 10." height = <<set_siconht>> src="images/system/icons/status/appearance.png"></a></td>'
+
+	if pcs_makeup < 5:
+		$statusIconBarTab += '<td><a href="exec:msg $pcs_makeup_msg"><img title="<<$pcs_makeup_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/makeup_'+pcs_makeup+'.png"></a></td>'
+	elseif pcs_makeup >= 5:
+		$statusIconBarTab += '<td><a href="exec:msg $pcs_makeup_msg"><img title="<<$pcs_makeup_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/makeup_4.png"></a></td>'
+	end
+
+	if greben = 0 or pcs_hairbsh = 1:
+		$stat_brush_msg = 'Your hair is <<$pcs_hairbsh>>.'
+		$statusIconBarTab += '<td><a href="exec:msg $stat_brush_msg"><img title="<<$stat_brush_msg>>" height = <<set_siconht>> src="images/system/icons/status/hair_'+pcs_hairbsh+'.png"></a></td>'
+	else
+		$statusIconBarTab += '<td><a href="exec: minut += 2 & pcs_hairbsh = 1 & gs ''stat''"><img title="Click to brush your hair." height = <<set_siconht>> src="images/system/icons/status/hair_0.png"></a></td>'
+	end
+
+	if pcs_lipbalm > 0:
+		$stat_lipbalm_msg = 'Your lips are covered in moisturizing balm.'
+		$statusIconBarTab += '<td><a href="exec:msg $stat_lipbalm_msg"><img title="You have applied lip balm." height = <<set_siconht>> src="images/system/icons/status/lipstick.png"></a></td>'
+	end
+
+	if false_lashes >= 1:
+		$stat_lashes_msg = 'You''re wearing false'+iif(pcs_lashes = 4, ' mink ', ' ')+'lashes.'
+		$statusIconBarTab +='<td><a href="exec: $stat_lashes_msg"><img title="<<$stat_lashes_msg>>" height = <<set_siconht>> src="images/system/icons/status/lashes.png"></a></td>'
+	end
+
+	if deodorant_on = 1 and pcs_sweat < 20: $statusIconBarTab += '<td><a href="exec:msg $stat_sweat_msg"><img title="<<$stat_sweat_msg>>" height = <<set_siconht>> src="images/system/icons/status/deodorant.png"></a></td>'
+
+	if pcs_sweat > 19: $statusIconBarTab += '<td><a href="exec:msg $stat_sweat_msg"><img title="<<$stat_sweat_msg>>" height = <<set_siconht>> src="images/system/icons/status/need_shower.png"></a></td>'
+
+	if pcs_leghair > 3 or (pubestyle > 0 and pcs_pubes >= shave_trigger):
+		if (pubestyle > 0 and pcs_pubes >= shave_trigger):
+			$stat_shave_msg = 'You need to shave your'+iif(pcs_leghair > 3, ' legs and ', ' ')+'pussy.'
+		elseif pcs_leghair > 3:
+			$stat_shave_msg = 'You need to shave your legs.'
+		end
+		$statusIconBarTab += '<td><a href="exec:msg $stat_shave_msg"><img title="<<$stat_shave_msg>>" height = <<set_siconht>> src="images/system/icons/status/need_shave.png"></a></td>'
+	end
+
+	$statusIconBarTab += '</tr><tr>'
+
+	!!Row 2: Mood, Arousal, Hunger, Thirst, Health without STDs...
+
+	willpower_percent = (100 * pcs_willpwr)/willpowermax
+	if willpower_percent > 60:
+		$stat_willpower_msg = 'You feel confident and in control. You still have <<pcs_willpwr>> (<<willpower_percent>>%) of your willpower left.'
+		$stat_willpower_tooltip = 'You have <<pcs_willpwr>> (<<willpower_percent>>%) of your willpower.'
+		$statusIconBarTab += '<td><a href="exec:msg $stat_willpower_msg"><img title="<<$stat_willpower_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/willpower_high.png"></a></td>'
+	elseif willpower_percent > 30:
+		$stat_willpower_msg = 'You feel like you have less control over yourself than usual. You have <<pcs_willpwr>> (<<willpower_percent>>%) of your willpower left.'
+		$stat_willpower_tooltip = 'You have <<pcs_willpwr>> (<<willpower_percent>>%) of your willpower.'
+		$statusIconBarTab += '<td><a href="exec:msg $stat_willpower_msg"><img title="<<$stat_willpower_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/willpower_med.png"></a></td>'
+	else
+		$stat_willpower_msg = 'In your current state, you could easily be pressured into doing things against your will. You have <<pcs_willpwr>> (<<willpower_percent>>%) of your willpower left.'
+		$stat_willpower_tooltip = 'You only have <<pcs_willpwr>> (<<willpower_percent>>%) of your willpower.'
+		$statusIconBarTab += '<td><a href="exec:msg $stat_willpower_msg"><img title="<<$stat_willpower_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/willpower_low.png"></a></td>'
+	end
+
+	if pcs_mood >= 80:
+		$statusIconBarTab += '<td><a href="exec:msg ''You are in a great mood.''"><img title="You are in a great mood." height = <<set_siconht>> src="images/system/icons/status/mood_1.png"></a></td>'
+	elseif pcs_mood >= 60:
+		$statusIconBarTab += '<td><a href="exec:msg ''You are in an OK mood.''"><img title="You are in an OK mood." height = <<set_siconht>> src="images/system/icons/status/mood_2.png"></a></td>'
+	elseif pcs_mood >= 40:
+		$statusIconBarTab += '<td><a href="exec:msg ''You are in a good mood.''"><img title="You are in a good mood." height = <<set_siconht>> src="images/system/icons/status/mood_3.png"></a></td>'
+	elseif pcs_mood >= 20:
+		$statusIconBarTab += '<td><a href="exec:msg ''You are in a bad mood.''"><img title="You are in a bad mood." height = <<set_siconht>> src="images/system/icons/status/mood_4.png"></a></td>'
+	elseif pcs_mood >= 5:
+		$statusIconBarTab += '<td><a href="exec:msg ''You are in a terrible mood.''"><img title="You are in a terrible mood." height = <<set_siconht>> src="images/system/icons/status/mood_5.png"></a></td>'
+	else
+		$statusIconBarTab += '<td><a href="exec:msg ''You are really depressed and need to improve your mood.''"><img title="You are really depressed." height = <<set_siconht>> src="images/system/icons/status/mood_6.png"></a></td>'
+	end
+
+	if mood_trauma > 0:
+		mood_max_calc = max(10, mood_max)
+		$stat_trauma_msg = 'Recent events have lowered your maximum mood to <<mood_max_calc>>.'
+		$statusIconBarTab += '<td><a href="exec:msg $stat_trauma_msg"><img title="<<$stat_trauma_msg>>" height = <<set_siconht>> src="images/system/icons/status/mood_6.png"></a></td>'
+		killvar 'mood_max_calc'
+	end
+
+	if menu_off = 0:
+		if pain['total'] > 90:
+			$statusIconBarTab += '<td><a href="exec: menu_page = 3 & gs ''obj_din'', ''pain''"><img title="You feel you are at your limit with the amount of pain you''re feeling! Click to find out more." height = <<set_siconht>> src="images/system/icons/status/pain_3.png"></a></td>'
+		elseif pain['total'] > 60:
+			$statusIconBarTab += '<td><a href="exec: menu_page = 3 & gs ''obj_din'', ''pain''"><img title="You are in a fair amount of pain, making you noticeably uncomfortable. Click to find out more." height = <<set_siconht>> src="images/system/icons/status/pain_2.png"></a></td>'
+		elseif pain['total'] > 30:
+			$statusIconBarTab += '<td><a href="exec: menu_page = 3 & gs ''obj_din'', ''pain''"><img title="The pain you''re feeling is minimal. It makes you a little uncomfortable. Click to find out more." height = <<set_siconht>> src="images/system/icons/status/pain_1.png"></a></td>'
+		end
+	else
+		if pain['total'] > 90:
+			$statusIconBarTab += '<td><a href="exec: msg $stat_disable_msg"><img title="You feel you are at your limit with the amount of pain you''re feeling!" height = <<set_siconht>> src="images/system/icons/status/pain_3.png"></a></td>'
+		elseif pain['total'] > 60:
+			$statusIconBarTab += '<td><a href="exec: msg $stat_disable_msg"><img title="You are in a fair amount of pain, making you noticeably uncomfortable." height = <<set_siconht>> src="images/system/icons/status/pain_2.png"></a></td>'
+		elseif pain['total'] > 30:
+			$statusIconBarTab += '<td><a href="exec: msg $stat_disable_msg"><img title="The pain you''re feeling is minimal. It makes you a little uncomfortable." height = <<set_siconht>> src="images/system/icons/status/pain_1.png"></a></td>'
+		end
+	end
+
+	if pcs_horny > 90:
+		$statusIconBarTab += '<td><a href="exec:msg ''You can not stop thinking about sex. You are soaked between your legs from your juices.''"><img title="You can not stop thinking about sex." height = <<set_siconht>> src="images/system/icons/status/arousal_high.png"></a></td>'
+	elseif pcs_horny > 60:
+		$statusIconBarTab += '<td><a href="exec:msg ''You are a little nervous, feeling itchy between your legs from arousal.''"><img title="You are feeling aroused." height = <<set_siconht>> src="images/system/icons/status/arousal_med.png"></a></td>'
+	elseif pcs_horny > 30:
+		$statusIconBarTab += '<td><a href="exec:msg ''You are feeling a tingling sensation between your legs.''"><img title="You are feeling a bit aroused." height = <<set_siconht>> src="images/system/icons/status/arousal_low.png"></a></td>'
+	end
+
+	if cheatNoEat = 0 and $stat_hunger_msg ! '' and buterbrod = 0:
+		$statusIconBarTab += '<td><a href="exec:msg $stat_hunger_msg"><img title="<<$stat_hunger_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/need_food.png"></a></td>'
+	elseif cheatNoEat = 0 and $stat_hunger_msg ! '' and buterbrod = 1 and menu_off = 0:
+		$statusIconBarTab += '<td><a href="exec: buterbrod = 0 & pcs_energy += 40 & cumspclnt = 2 & gs ''cum_cleanup'' & fat += 1 & gs ''stat''"><img title="Click to eat your sandwich." height = <<set_siconht>> src="images/system/icons/status/need_food.png"></a></td>'
+	elseif cheatNoEat = 0 and $stat_hunger_msg ! '' and buterbrod = 1 and menu_off = 1:
+		$statusIconBarTab += '<td><a href="exec: $stat_hunger_msg"><img title="Your sandwich has to wait until you can spare a minute." height = <<set_siconht>> src="images/system/icons/status/need_food.png"></a></td>'
+	end
+
+	if cheatNoDrink = 0 and $stat_thirst_msg ! '' and bottle = 0 and refillable_bottle < 2:
+		$statusIconBarTab += '<td><a href="exec:msg $stat_thirst_msg"><img title="<<$stat_thirst_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/need_drink.png"></a></td>'
+	elseif cheatNoDrink = 0 and $stat_thirst_msg ! '' and refillable_bottle > 1 and menu_off = 0:
+		$statusIconBarTab += '<td><a href="exec: refillable_bottle -= 1 & pcs_hydra += 100 & cumspclnt = 2 & gs ''cum_cleanup'' & gs ''stat''"><img title="Click to drink from your refillable water bottle." height = <<set_siconht>> src="images/system/icons/status/need_drink.png"></a></td>'
+	elseif cheatNoDrink = 0 and $stat_thirst_msg ! '' and bottle > 0 and menu_off = 0:
+		$statusIconBarTab += '<td><a href="exec: bottle = 0 & pcs_hydra += 100 & cumspclnt = 2 & gs ''cum_cleanup'' & gs ''stat''"><img title="Click to drink from your water bottle." height = <<set_siconht>> src="images/system/icons/status/need_drink.png"></a></td>'
+	elseif cheatNoDrink = 0 and $stat_thirst_msg ! '' and (bottle > 0 or refillable_bottle > 1) and menu_off = 1:
+		$statusIconBarTab += '<td><a href="exec:msg $stat_thirst_msg"><img title="Your water bottle has to wait until you can spare a minute." height = <<set_siconht>> src="images/system/icons/status/need_drink.png"></a></td>'
+	end
+
+	if cheatNoSleep= 0 and $stat_sleep_msg ! '': $statusIconBarTab += '<td><a href="exec:msg $stat_sleep_msg"><img title="<<$stat_sleep_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/need_sleep.png"></a></td>'
+
+	$statusIconBarTab += '</tr><tr>'
+
+	!!Row 3: Pregnancy, cum, lactation, STD...
+
+	if menu_off = 0:
+		$statusIconBarTab += '<td><a href="exec:dynamic $d_cycreport_choice"><img title="Click to open the cycle menu." height = <<set_siconht>> src="images/system/icons/status/vagina.png"></a></td>'
+	elseif menu_off = 1:
+		$statusIconBarTab += '<td><a href="exec:msg $stat_disable_msg"><img title="<<$stat_disable_msg>>" height = <<set_siconht>> src="images/system/icons/status/vagina.png"></a></td>'
+	end
+	if mesec > 0 and isprok = 0 and isprokp = 0:
+		$stat_bleed_msg = 'You need to use your feminine hygiene products'+iif($pantyworntype = 'none', ' and you need to also wear panties if you want to use a sanitary pad.', '.')
+		$statusIconBarTab += '<td><a href="exec:msg $stat_bleed_msg"><img title="<<$stat_bleed_msg>>" height = <<set_siconht>> src="images/system/icons/status/vperiod_bleeding.png"></a></td>'
+	elseif mesec > 0 and (isprok > 0 or isprokp > 0):
+		$stat_bleed_msg = 'You''re using feminine hygiene products.'
+		$statusIconBarTab += '<td><a href="exec:msg $stat_bleed_msg"><img title="<<$stat_bleed_msg>>" height = <<set_siconht>> src="images/system/icons/status/vperiod_sanitaries.png"></a></td>'
+	elseif placebopart > 0 and LutH > 0 and knowpreg = 0:
+		$stat_bleed_msg = 'Your period is due to start soon.'
+		$statusIconBarTab += '<td><a href="exec:msg $stat_bleed_msg"><img title="<<$stat_bleed_msg>>" height = <<set_siconht>> src="images/system/icons/status/vunknown.png"></a></td>'
+	elseif implant_day > 0 and ((daystart - implant_day) * 24 + hour - implant_hour) < 5:
+		$stat_bleed_msg = 'You feel a slight twinge in your abdomen.'
+		$statusIconBarTab += '<td><a href="exec:msg $stat_bleed_msg"><img title="<<$stat_bleed_msg>>" height = <<set_siconht>> src="images/system/icons/status/vunknown.png"></a></td>'
+	elseif thinkpreg = 0 and knowpreg = 0 and cycle ! 6 and pillcon2 <= 30000 and succubusflag ! 1 and cheatSlut = 0 and mesec = 0:
+		if abortionbirthdate = 0 and daystart - daylastperiod > 28:
+			if (daystart - daylastperiod > 28) and (daystart - daylastperiod <= 35):
+				$stat_bleed_msg = 'Your period is late by <<daystart - daylastperiod - 28>> days.'
+			elseif (daystart - daylastperiod > 35) and (daystart - daylastperiod <= 42):
+				$stat_bleed_msg = 'Your period is late by more than a week!'
+			elseif (daystart - daylastperiod > 42) and (daystart - daylastperiod <= 56):
+				$stat_bleed_msg = 'Your period is late by more than two weeks! Maybe you should see a doctor?'
+			elseif (daystart - daylastperiod > 56) and (daystart - daylastperiod <= 84):
+				$stat_bleed_msg = 'Your period is late by more than a month! You really should see a doctor about it.'
+			elseif daystart - daylastperiod > 84:
+				$stat_bleed_msg = 'You should consider the possibility of a pregnancy, since apparently you no longer have periods.'
+			end
+			$statusIconBarTab += '<td><a href="exec:msg $stat_bleed_msg"><img title="<<$stat_bleed_msg>>" height = <<set_siconht>> src="images/system/icons/status/vunknown.png"></a></td>'
+		elseif abortionbirthdate ! 0 and daystart - abortionbirthdate <= 26:
+			if daystart - abortionbirthdate <= 13:
+				$stat_bleed_msg = 'You are still in your recovery period. Nothing to worry about.'
+			elseif daystart - abortionbirthdate > 13 and daystart - abortionbirthdate <= 16:
+				$stat_bleed_msg = 'You are maybe still in your recovery period, but there could be a risk.'
+			elseif daystart - abortionbirthdate > 16 and daystart - abortionbirthdate <= 21:
+				$stat_bleed_msg = 'You should have recovered from you abortion by know... Right?'
+			elseif daystart - abortionbirthdate > 21 and daystart - abortionbirthdate <= 26:
+				$stat_bleed_msg = 'You should have definitely recovered from your abortion by now.'
+			end
+			$statusIconBarTab += '<td><a href="exec:msg $stat_bleed_msg"><img title="<<$stat_bleed_msg>>" height = <<set_siconht>> src="images/system/icons/status/vunknown.png"></a></td>'
+		elseif pregbirthdate ! 0 and daystart - pregbirthdate <= 80:
+			if daystart - pregbirthdate <= 41:
+				$stat_bleed_msg = 'You are still in your recovery period. Nothing to worry about.'
+			elseif daystart - pregbirthdate > 41 and daystart - pregbirthdate <= 48:
+				$stat_bleed_msg = 'You are probably still in your recovery period.'
+			elseif daystart - pregbirthdate > 48 and daystart - pregbirthdate <= 55:
+				$stat_bleed_msg = 'You are maybe still in your recovery period, but there could be a risk.'
+			elseif daystart - pregbirthdate > 55 and daystart - pregbirthdate <= 70:
+				$stat_bleed_msg = 'You should have recovered by know... Right?'
+			elseif daystart - pregbirthdate > 70 and daystart - pregbirthdate <= 80:
+				$stat_bleed_msg = 'You should have definitely recovered from giving birth by now.'
+			end
+			$statusIconBarTab += '<td><a href="exec:msg $stat_bleed_msg"><img title="<<$stat_bleed_msg>>" height = <<set_siconht>> src="images/system/icons/status/vunknown.png"></a></td>'
+		end
+	elseif preg = 1:
+		if thinkpreg = 1 and knowpreg = 0:
+			$stat_preg_msg = 'You think you''re pregnant, but aren''t sure.'
+			$stat_preg_tooltip = 'I think I''m pregnant.'
+		elseif knowpreg = 1:
+			$stat_preg_tooltip = 'I''m pregnant.'
+			$stat_preg_msg = 'You are pregnant. Your due date is around <<$pregduedate>>.'
+			$statusIconBarTab += '<td><a href="exec:msg $stat_preg_msg"><img title="<<$stat_preg_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/vpregnant.png"></a></td>'
+		end
+	elseif preg = 2:
+		$stat_preg_msg = 'Broken water and contractions, it''s pretty clear what is going on. You need to get to a hospital ASAP.'
+		$stat_preg_tooltip = 'Go to the hospital, ASAP! You''re in labour!'
+		$statusIconBarTab += '<td><a href="exec:msg $stat_preg_msg"><img title="<<$stat_preg_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/labour.png"></a></td>'
+	end
+
+	gs 'lact_lib','breast_stat_icons'
+
+	if $stat_cum_msg ! '': $statusIconBarTab += '<td><a href="exec:msg $stat_cum_msg"><img title="You have cum in and/or on your body. Click to find out more." height = <<set_siconht>> src="images/system/icons/status/cum_covered.png"></a></td>'
+
+	if $stat_visible_cum_msg ! '': $statusIconBarTab += '<td><a href="exec:msg $stat_visible_cum_msg"><img title="People can see the cum on your body!" height = <<set_siconht>> src="images/system/icons/status/visible_cum.png"></a></td>'
+
+	if stat_cumloc_check = 1 and trait['cumeater'] = 1 and cumeater_cheat = 0 and menu_off = 0:
+		$statusIconBarTab += '<td><a href="exec: gs ''cum_manage'', ''cumeater_icon'' & gs ''stat''"><img title="Click to lick up all that delicious cum." height = <<set_siconht>> src="images/system/icons/status/cum_eater.png"></a></td>'
+	elseif stat_cumloc_check = 1 and trait['cumeater'] = 1 and cumeater_cheat = 0 and menu_off = 1:
+		$statusIconBarTab += '<td><a href="exec:msg $stat_disable_msg"><img title="<<$stat_disable_msg>>" height = <<set_siconht>> src="images/system/icons/status/cum_eater.png"></a></td>'
+	end
+
+	if stat_cumloc_check = 1 and salfetka > 0 and menu_off = 0:
+		$statusIconBarTab += '<td><a href="exec:dynamic $d_salf"><img title="Click to use your wipes." height = <<set_siconht>> src="images/system/icons/status/wipes.png"></a></td>'
+	elseif stat_cumloc_check = 1 and salfetka > 0 and menu_off = 1:
+		$statusIconBarTab += '<td><a href="exec:msg $stat_disable_msg"><img title="<<$stat_disable_msg>>" height = <<set_siconht>> src="images/system/icons/status/wipes.png"></a></td>'
+	end
+
+	stat_STD_count = 0
+	$stat_STD_msg = ''
+
+	if Gerpes >= 10 and GenHerpes = 1:
+		stat_STD_count += 1
+		$stat_STD_msg += 'Sores have appeared on your vagina. You have genital herpes.'
+	elseif Gerpes >= 5 and GenHerpes = 1:
+		stat_STD_count += 1
+		$stat_STD_msg += 'Your vagina is red and very itchy. You have genital herpes.'
+	elseif Gerpes >= 3 and Orerpes = 1:
+		stat_STD_count += 1
+		$stat_STD_msg += 'You have cold sores on your lips. You have oral herpes.'
+	end
+	if Gerpes >= 20 and GenHerpes = 1:
+		stat_STD_count += 1
+		if stat_STD_count > 1: $stat_STD_msg += '<br>'
+		$stat_STD_msg += 'The herpes sores also cover your ass.'
+	end
+	if Sifilis >= 50:
+		stat_STD_count += 1
+		if stat_STD_count > 1: $stat_STD_msg += '<br>'
+		$stat_STD_msg += 'Syphilitic rashes cover your whole body.'
+	elseif Sifilis >= 21:
+		stat_STD_count += 1
+		if stat_STD_count > 1: $stat_STD_msg += '<br>'
+		$stat_STD_msg += 'You have a single large, hard sore on the lip. You have syphilis.'
+	end
+	if Triper > 2:
+		stat_STD_count += 1
+		if stat_STD_count > 1: $stat_STD_msg += '<br>'
+		$stat_STD_msg += 'It stings when you''re urinating. You have gonorrhea.'
+	end
+	if Kandidoz > 30:
+		stat_STD_count += 1
+		if stat_STD_count > 1: $stat_STD_msg += '<br>'
+		$stat_STD_msg += 'There''s a white discharge coming from your vagina. You have yeast infection.'
+	end
+
+	if stat_STD_count > 0:
+		$stat_STD_tooltip = 'You have '+iif(stat_STD_count = 1, 'a', '<<stat_STD_count>>')+' STD'+iif(stat_STD_count = 1, '.', 's.')+' Click to find out more.'
+		$statusIconBarTab += '<td><a href="exec:msg $stat_STD_msg"><img title="<<$stat_STD_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/std.png"></a></td>'
+	end
+
+	if $stat_lack_of_sleep_msg ! '':
+		if pcs_condition['lack_of_sleep'] >= 20:
+			$statusIconBarTab += '<td><a href="exec:msg $stat_lack_of_sleep_msg"><img title="<<$stat_lack_of_sleep_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/lack_of_sleep_4.png"></a></td>'
+		elseif pcs_condition['lack_of_sleep'] >= 10:
+			$statusIconBarTab += '<td><a href="exec:msg $stat_lack_of_sleep_msg"><img title="<<$stat_lack_of_sleep_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/lack_of_sleep_3.png"></a></td>'
+		elseif pcs_condition['lack_of_sleep'] >= 5:
+			$statusIconBarTab += '<td><a href="exec:msg $stat_lack_of_sleep_msg"><img title="<<$stat_lack_of_sleep_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/lack_of_sleep_2.png"></a></td>'
+		elseif pcs_condition['lack_of_sleep'] >= 2:
+			$statusIconBarTab += '<td><a href="exec:msg $stat_lack_of_sleep_msg"><img title="<<$stat_lack_of_sleep_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/lack_of_sleep_1.png"></a></td>'
+		end
+	end
+
+	$statusIconBarTab += '</tr><tr>'
+
+	!!Row 4: Status, Jobs, School
+
+
+	if bimbolevel > 0: $statusIconBarTab += '<td><a href="exec:msg $bimbostatus"><img title="<<$bimbo_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/bimbo.png"></a></td>'
+
+	if $stat_hypno_msg ! '': $statusIconBarTab += '<td><a href="exec:msg $stat_hypno_msg"><img title="<<$stat_hypno_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/hypno_addict.png"></a></td>'
+
+	if succubusflag = 1 and succhungry > 0:
+		$stat_succ_msg = 'You have needed to feed for <<succhungry>> day'+iif(succhungry > 1, 's.', '.')
+		$statusIconBarTab += '<td><a href="exec:msg $stat_succ_msg"><img title="You need to feed." height = <<set_siconht>> src="images/system/icons/status/need_succubus_feeding.png"></a></td>'
+	end
+
+	if $stat_court_msg ! '': $statusIconBarTab += '<td><a href="exec:msg $stat_court_msg"><img title="<<$stat_court_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/court.png"></a></td>'
+
+	if $stat_musiclesson_msg ! '': $statusIconBarTab += '<td><a href="exec:msg $stat_musiclesson_msg "><img title="<<$stat_musiclesson_tip>>" height = <<set_siconht>> src="images/system/icons/status/musiclesson.png"></a></td>'
+
+	if $stat_school_icon_msg ! '' and SchoolBlock = 0: $statusIconBarTab += '<td><a href="exec:msg $stat_school_icon_msg"><img title="<<$stat_school_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/school.png"></a></td>'
+
+	if $stat_uni_icon_msg ! '' and (university['semester_week'] = -1 or (university['semester_passed'] = university['enrolled_in_semester'] and university['diploma'] = 0)): $statusIconBarTab += '<td><a href="exec:msg $stat_uni_icon_msg"><img title="<<$stat_uni_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/uni_class_3.png"></a></td>'
+
+	if $stat_uni_icon_msg ! '' and university['semester_week'] > 0: $statusIconBarTab += '<td><a href="exec:msg $stat_uni_icon_msg"><img title="<<$stat_uni_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/uni_class_1.png"></a></td>'
+
+	if $stat_uni_icon_msg ! '' and university['exam_week'] > 0: $statusIconBarTab += '<td><a href="exec:msg $stat_uni_icon_msg"><img title="<<$stat_uni_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/uni_class_2.png"></a></td>'
+
+	if $stat_game_night_msg ! '': $statusIconBarTab += '<td><a href="exec:msg $stat_game_night_msg"><img title="<<$stat_game_night_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/game_night.png"></a></td>'
+
+	!!maybe we should remove this one, and create specialized icons for all the jobs? This one is not informative
+	if work > 0: $statusIconBarTab += '<td><a href="exec: gt ''journal'', ''records''"><img title="You have a job. Click to find out more." height = <<set_siconht>> src="images/system/icons/status/work.png"></a></td>'
+
+	if masseuse['jobtype'] > 0:
+		if (masseuse['<<week>>_shift_1'] = 1 and hour <= 9) or (masseuse['<<week>>_shift_2'] = 1 and hour <= 13) or (masseuse['<<week>>_shift_3'] = 1 and hour <= 17):
+			$stat_masseuse_msg = 'You work at the beauty salon today, at '
+			if masseuse['<<week>>_shift_1'] = 1 and hour <= 9:
+				$stat_masseuse_msg += '9:00, '
+			end
+			if masseuse['<<week>>_shift_2'] = 1 and hour <= 13:
+				$stat_masseuse_msg += '13:00, '
+			end
+			if masseuse['<<week>>_shift_3'] = 1 and hour < 17:
+				$stat_masseuse_msg += '17:00, '
+			end
+			$stat_masseuse_msg += 'and you have worked <<masseuse[''shifts_worked'']>> of the required <<masseuse[''shifts_required'']>> shifts.'
+		
+			$statusIconBarTab += '<td><a href="exec: msg $stat_masseuse_msg"><img title="<<$stat_masseuse_msg>>" height = <<set_siconht>> src="images/system/icons/status/masseuse.png"></a></td>'
+		end
+	end
+
+	if model['icon'] = 1:
+		if model['status'] > 0 and model_week < (daystart - week) / 7 and model_job_week = 1:
+			$stat_model_msg = 'You can get paid for 1 more modeling job this week.'
+		elseif model['status'] > 0 and model_week < (daystart - week) / 7 and model_job_week < 1:
+			$stat_model_msg = 'You can get paid for 2 modeling jobs this week.'
+		end
+		$statusIconBarTab += '<td><a href="exec: msg $stat_model_msg"><img title="<<$stat_model_msg>>" height = <<set_siconht>> src="images/system/icons/status/model_'+iif(night_mode ! 3 and (($location_type = 'public_outdoors' and daystage = 5) or night_mode = 1 or night_mode = 2), 'white', 'black')+'.png"></a></td>'
+	end
+
+	if AlbinaQW['StarletsJoined'] > 0 and AlbinaQW['StarletsShutDown'] = 0 and npc_pregtalk['A23'] = 0 and starlets_on = 1:
+		if hour > 16 and starlets_practice > 0:
+			$stat_starlet_msg = 'You missed practice with the Starlets today!'
+		else
+			$stat_starlet_msg = 'You must be at Starlets practice between 15:00 and 16:00 today.'
+		end
+		if (hour < 16 or starlets_missed > 0) and starlets['late_message'] = 0:
+			if starlets_missed = 0:
+				$statusIconBarTab += '<td><a href="exec:msg $stat_starlet_msg"><img title="<<$stat_starlet_msg>>" height = <<set_siconht>> src="images/system/icons/status/starlets_'+iif(night_mode ! 3 and (($location_type = 'public_outdoors' and daystage = 5) or night_mode = 1 or night_mode = 2), 'white', 'black')+'.png"></a></td>'
+			else
+				$statusIconBarTab += '<td><a href="exec: starlets[''late_message''] = 1 & msg $stat_starlet_msg"><img title="<<$stat_starlet_msg>>" height = <<set_siconht>> src="images/system/icons/status/starlets_'+iif(night_mode ! 3 and (($location_type = 'public_outdoors' and daystage = 5) or night_mode = 1 or night_mode = 2), 'white', 'black')+'.png"></a></td>'
+			end
+		end
+	end
+
+	if volleysostav > 0 and week = 6 and sorevday ! daystart and hour <= 18:
+		$stat_volleyball_msg = 'There is volleyball tournament today at 18:00.'
+		$statusIconBarTab += '<td><a href="exec: msg $stat_volleyball_msg"><img title="<<$stat_volleyball_msg>>" height = <<set_siconht>> src="images/system/icons/status/volleball.png"></a></td>'
+	end
+	
+	if pfilmNO ! 1:
+		if pornstar['icon'] = 1 and pornstar['icon_disable'] ! daystart:
+		   if hour < 11:
+				$stat_porn_msg = 'You are starring in a porno today at 10:00.'
+				$statusIconBarTab += '<td><a href="exec: msg $stat_porn_msg"><img title="<<$stat_porn_msg>>" height = <<set_siconht>> src="images/system/icons/status/porn_'+iif(night_mode ! 3 and (($location_type = 'public_outdoors' and daystage = 5) or night_mode = 1 or night_mode = 2), 'white', 'black')+'.png"></a></td>'
+			elseif hour >= 11 and hour < 13:
+				$stat_porn_msg = 'You''re late for your shoot at the porn studio!'
+				$statusIconBarTab += '<td><a href="exec: msg $stat_porn_msg"><img title="<<$stat_porn_msg>>" height = <<set_siconht>> src="images/system/icons/status/porn_red.png"></a></td>'
+			else
+				$stat_porn_msg = 'You missed a scheduled porn shoot!'
+				$statusIconBarTab += '<td><a href="exec: pornstar[''icon_disable''] = daystart & msg $stat_porn_msg"><img title="<<$stat_porn_msg>>" height = <<set_siconht>> src="images/system/icons/status/porn_red.png"></a></td>'
+			end
+		end
+	end
+	
+	$statusIconBarTab += '</tr><tr>'
+
+	!!Row 5: Clothes,...
+
+	if $stat_bfgf_msg_0 ! '': $statusIconBarTab += '<td><a href="exec: $stat_bfgf_msg_0"><img title="<<$stat_bfgf_tooltip_0>>" height = <<set_siconht>> src="images/system/icons/status/date.png"></a></td>'
+
+	if $stat_bfgf_msg_1 ! '': $statusIconBarTab += '<td><a href="exec: $stat_bfgf_msg_1"><img title="<<$stat_bfgf_tooltip_1>>" height = <<set_siconht>> src="images/system/icons/status/date.png"></a></td>'
+
+	if $stat_bfgf_msg_2 ! '': $statusIconBarTab += '<td><a href="exec: $stat_bfgf_msg_2"><img title="<<$stat_bfgf_tooltip_2>>" height = <<set_siconht>> src="images/system/icons/status/date.png"></a></td>'
+
+	if $stat_clothes_msg ! '': $statusIconBarTab += '<td><a href="exec:msg $stat_clothes_msg"><img title="<<$stat_clothes_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/<<$stat_clothes_style>>.png"></a></td>'
+
+	if $stat_bra_msg ! '' and $braworntype ! 'none': $statusIconBarTab += '<td><a href="exec:msg $stat_bra_msg"><img title="<<$stat_bra_msg>>" height = <<set_siconht>> src="images/system/icons/status/bra.png"></a></td>'
+
+	if $stat_bra_msg ! '' and $braworntype = 'none': $statusIconBarTab += '<td><a href="exec: msg $stat_bra_msg"><img title="<<$stat_bra_msg>>" height = <<set_siconht>> src="images/system/icons/status/boobs_'+iif(night_mode ! 3 and (($location_type = 'public_outdoors' and daystage = 5) or night_mode = 1 or night_mode = 2), 'white', 'black')+'.png"></a></td>'
+
+	if $stat_panty_msg ! '' and $pantyworntype ! 'none' and trait['commando_lvl'] < 3:
+		$statusIconBarTab += '<td><a href="exec:msg $stat_panty_msg"><img title="<<$stat_panty_msg>>" height = <<set_siconht>> src="images/system/icons/status/panties.png"></a></td>'
+	elseif $stat_panty_msg ! '' and $pantyworntype ! 'none' and trait['commando_lvl'] = 3:
+		$statusIconBarTab += '<td><a href="exec:msg $stat_panty_msg"><img title="<<$stat_panty_msg>>" height = <<set_siconht>> src="images/system/icons/status/panties_red.png"></a></td>'
+	end
+
+	if $stat_panty_msg ! '' and $pantyworntype = 'none' and PCloPanties = 0: $statusIconBarTab += '<td><a href="exec: msg $stat_panty_msg"><img title="<<$stat_panty_msg>>" height = <<set_siconht>> src="images/system/icons/status/commando_'+iif(night_mode ! 3 and (($location_type = 'public_outdoors' and daystage = 5) or night_mode = 1 or night_mode = 2), 'white', 'black')+'.png"></a></td>'
+
+
+
+	if analplugIN = 1 and vibratorin = 0:
+		$statusIconBarTab += '<td><a href="exec:msg ''A butt plug is inside your ass.''"><img title="A butt plug is inside your ass." height = <<set_siconht>> src="images/system/icons/status/tbutt_plug.png"></a></td>'
+	elseif analplugIN = 0 and vibratorin = 1:
+		$statusIconBarTab += '<td><a href="exec:msg ''A vibrator is inside your vagina.''"><img title="A vibrator is inside your vagina." height = <<set_siconht>> src="images/system/icons/status/tvibrator.png"></a></td>'
+	elseif analplugIN = 1 and vibratorin = 1:
+		$statusIconBarTab += '<td><a href="exec:msg ''You are wearing a plug and a vibrator.''"><img title="You are wearing a plug and a vibrator." height = <<set_siconht>> src="images/system/icons/status/tdouble_stuffed.png"></a></td>'
+	end
+
+	$statusIconBarTab += '</tr><tr>'
+
+	!!Row 5: Drugs and other short term stuff
+
+	if siga > 0:
+		$stat_smoker_msg = 'You have <<siga>> cigarette'+iif(siga = 1, '', 's')+iif(smokerNeed > 0 and NarkImmune = 0, ' and you want to smoke.' , '.')
+		$statusIconBarTab += '<td><a href="exec:msg $stat_smoker_msg"><img title="<<$stat_smoker_msg>>" height = <<set_siconht>> src="images/system/icons/status/cigarettes.png"></a></td>'
+	end
+
+	if smoker >= 20 and NarkImmune = 0 and smokerNeed > 20 and siga > 0:
+		$statusIconBarTab += '<td><a href="exec: gs ''drugs'',''smoke'' & ''You are smoking a cigarette.''"><img title="You really need to smoke, click to smoke a cigarette." height = <<set_siconht>> src="images/system/icons/status/craving_nicotine.png"></a></td>'
+	elseif smoker >= 20 and NarkImmune = 0 and smokerNeed > 20 and siga <= 0:
+		$statusIconBarTab += '<td><a href="exec:msg ''You really need to smoke, but you have no cigarettes.''"><img title="You really need to smoke, but you have no cigarettes." height = <<set_siconht>> src="images/system/icons/status/craving_nicotine.png"></a></td>'
+	elseif siga > 0:
+		$statusIconBarTab += '<td><a href="exec: gs ''drugs'',''smoke'' & ''You are smoking a cigarette.''"><img title="Click to smoke a cigarette." height = <<set_siconht>> src="images/system/icons/status/smoke_cigarette.png"></a></td>'
+	end
+
+	if narkday ! daystart and narkoman = 1 and Slomka > 0:
+		$stat_drug_msg += 'You need heroin and cocaine.'
+	elseif narkday ! daystart and narkoman = 1 and Slomka <= 0:
+		$stat_drug_msg += 'You need cocaine.'
+	elseif SLomka > 0:
+		$stat_drug_msg += 'You need heroin.'
+	else
+		$stat_drug_msg = ''
+	end
+
+	if $stat_drug_msg ! '': $statusIconBarTab += '<td><a href="exec:msg $stat_drug_msg"><img title="<<$stat_drug_msg>>" height = <<set_siconht>> src="images/system/icons/status/craving_drugs.png"></a></td>'
+
+	if alko > 0:
+		if alko = 1:
+			$statusIconBarTab += '<td><a href="exec:msg ''You feel a little buzz from drinking.''"><img title="You feel a little buzz from drinking." height = <<set_siconht>> src="images/system/icons/status/alko_1.png"></a></td>'
+		elseif alko < 4:
+			$statusIconBarTab += '<td><a href="exec:msg ''You are feeling a bit tipsy.''"><img title="You are feeling a bit tipsy." height = <<set_siconht>> src="images/system/icons/status/alko_2.png"></a></td>'
+		elseif alko < 6:
+			$statusIconBarTab += '<td><a href="exec:msg ''You are drunk.''"><img title="You are drunk." height = <<set_siconht>> src="images/system/icons/status/alko_3.png"></a></td>'
+		elseif alko < 10:
+			$statusIconBarTab += '<td><a href="exec:msg ''You are very drunk.''"><img title="You are very drunk." height = <<set_siconht>> src="images/system/icons/status/alko_4.png"></a></td>'
+		else
+			$statusIconBarTab += '<td><a href="exec:msg ''You are wasted.''"><img title="You are wasted." height = <<set_siconht>> src="images/system/icons/status/alko_4.png"></a></td>'
+		end
+	end
+
+	if mentats_dose >= 1: $statusIconBarTab += '<td><a href="exec:msg ''You feel sharp and focused.''"><img title="You feel sharp and focused." height = <<set_siconht>> src="images/system/icons/status/drugs.png"></a></td>'
+
+	if aphrodisiac_timer > 0: $statusIconBarTab +='<td><a href="exec:msg ''You are feeling hot, and every move causes your groin to tingle.''"><img title="You are feeling hot." height = <<set_siconht>> src="images/system/icons/status/aphro_gum.png"></a></td>'
+
+	if $stat_frost_msg ! '': $statusIconBarTab += '<td><a href="exec:msg $stat_frost_msg"><img title="<<$stat_frost_msg>>" height = <<set_siconht>> src="images/system/icons/status/hypothermia.png"></a></td>'
+
+	if sick > 0: $statusIconBarTab += '<td><a href="exec:msg $stat_sick_msg"><img title="<<$stat_sick_tooltip>>" height = <<set_siconht>> src="images/system/icons/status/health.png"></a></td>'
+
+	if recuperation = 1: $statusIconBarTab += '<td><a href="exec:msg ''You are still recovering from major surgery.''"><img title="You are recovering from major surgery." height = <<set_siconht>> src="images/system/icons/status/health.png"></a></td>'
+
+	if bcream_used = 1: $statusIconBarTab += '<td><a href="exec:msg ''Your breasts feel hot and tingly.''"><img title="Your breasts feel hot and tingly." height = <<set_siconht>> src="images/system/icons/status/breast_cream.png"></a></td>'
+
+	if cumcondslip > 0: $statusIconBarTab += '<td><a href="exec:msg ''You feel sick, and you are wondering about the used condom you never found. Maybe those two things are related?''"><img title="You feel sick. Click to find out more." height = <<set_siconht>> src="images/system/icons/status/stuck_condom.png"></a></td>'
+
+	if $stat_writing_msg ! '': $statusIconBarTab += '<td><a href="exec:msg $stat_writing_msg"><img title="<<$stat_writing_msg>>" height = <<set_siconht>> src="images/system/icons/status/body_writing.png"></a></td>'
+
+	$statusIconBarTab += '</tr></table>'
+	$stat_msg += func('cleanHTML',$statusIconBarTab)
+	killvar '$statusIconBarTab'
+else
+	$stat_msg += '<br>'
+end
+
+!!-----------------Status Icons (End)------------------
+
+!!----------------Stat Display, start--------------------------
+$stat_tool_msg=''
+$stat_extra_msg=''
+
+if cheatStatusIcons = 1:
+	$stat_tool_msg += '<a href="exec:cheatStatusIcons = 0 & gs ''$menu_obnovit''">▽Icons</a> '
+else
+	$stat_tool_msg += '<a href="exec:cheatStatusIcons = 1 & gs ''$menu_obnovit''">▲Icons</a> '
+end
+
+if enable_show_status = 0:
+	$stat_tool_msg += '<a href="exec:enable_show_status = 1 & gs ''$menu_obnovit''">▲Status</a> '
+else
+	$stat_tool_msg += '<a href="exec:enable_show_status = 0 & gs ''$menu_obnovit''">▽Status</a> '
+end
+
+if enable_show_status = 0:
+	if ETOmenu = 1:
+		$stat_extra_msg += '<BR><b><<$pcs_health>></b>'
+		$stat_extra_msg += '<BR><b><<$pcs_willpwr>></b>'
+		if cheatNoEat = 0: $stat_extra_msg += '<BR><b><<$pcs_energy>></b>'
+		if cheatNoDrink = 0: $stat_extra_msg += '<BR><b><<$pcs_hydra>></b>'
+		if cheatNoSleep = 0: $stat_extra_msg += '<BR><b><<$pcs_sleep>></b>'
+	elseif Enable_scalepic = 2:
+		$st_temp='rgb(<<(16777216 + fcolor) mod 256>>,<<(16777216 + fcolor)/256 mod 256>>,<<(16777216 + fcolor)/65536>>)'
+		$stat_extra_msg += '<p><font color="<<$st_temp>>"><TABLE width="300" cellpadding="1" cellspacing="0"><TR><TD width="85%">'+FUNC('indiktab', '2', pcs_horny, pcs_horny)+'</TD><TD> Arousal</TD></TR><TR><TD width="85%">'+FUNC('indiktab', '2', pain['total'], pain['total'])+'</TD><TD> Pain</TD></TR><TR><TD width="85%">'+FUNC('indiktab', '1', pcs_health * 100 / healthmax, pcs_health)+'</TD><TD> Health</TD></TR>'
+		if $start_type[1] ! 'nomagic': $stat_extra_msg += '<TR><TD width="85%">'+FUNC('indiktab', '1', pcs_mana * 100 / manamax, pcs_mana)+'</TD><TD> Mana</TD></TR>'
+		$stat_extra_msg += '<TR><TD width="85%">'+FUNC('indiktab', '1', pcs_willpwr * 100 / willpowermax, pcs_willpwr)+'</TD><TD> Willpower</TD></TR><TR><TD width="85%">'+FUNC('indiktab', '1', pcs_stam * 100 / stammax, pcs_stam)+'</TD><TD> Stamina</TD></TR><TR><TD width="85%">'+FUNC('indiktab', '1', pcs_mood, pcs_mood)+'</TD><TD> Mood</TD></TR>'
+		if cheatNoEat = 0: $stat_extra_msg += '<TR><TD width="85%">'+FUNC('indiktab', '1', pcs_energy, pcs_energy)+'</TD><TD> Hunger</TD></TR>'
+		if cheatNoDrink = 0: $stat_extra_msg += '<TR><TD width="85%">'+FUNC('indiktab', '1', pcs_hydra, pcs_hydra)+'</TD><TD> Thirst</TD></TR>'
+		if cheatNoSleep = 0: $stat_extra_msg += '<TR><TD width="85%">'+FUNC('indiktab', '1', pcs_sleep, pcs_sleep)+'</TD><TD> Sleep</TD></TR></TABLE></font></p>'
+	else
+		gs 'indik', '2', pcs_horny, pcs_horny
+		$stat_extra_msg += '<BR><<$ind>> Arousal'
+
+		gs 'indik', '2', pain['total'], pain['total'], pain['damage']
+		$stat_extra_msg += '<BR><<$ind>> Pain'
+
+		gs 'indik', '1', pcs_health * 100 / healthmax, pcs_health
+		$stat_extra_msg += '<BR><<$ind>> Health'
+
+		if $start_type[1] ! 'nomagic':
+			gs 'indik', '1', pcs_mana * 100 / manamax, pcs_mana
+			$stat_extra_msg += '<BR><<$ind>> Mana'
+		end
+
+		gs 'indik', '1', pcs_willpwr * 100 / willpowermax, pcs_willpwr
+		$stat_extra_msg += '<BR><<$ind>> Willpower'
+
+		gs 'indik', '1', pcs_stam * 100 / stammax, pcs_stam
+		$stat_extra_msg += '<BR><<$ind>> Stamina'
+
+		gs 'indik', '1', pcs_mood, pcs_mood
+		$stat_extra_msg += '<BR><<$ind>> Mood'
+
+		if cheatNoEat = 0:
+			gs 'indik', '1', pcs_energy, pcs_energy
+			$stat_extra_msg += '<BR><<$ind>> Hunger'
+		end
+
+		if cheatNoDrink = 0:
+			gs 'indik', '1', pcs_hydra, pcs_hydra
+			$stat_extra_msg += '<BR><<$ind>> Thirst'
+		end
+
+		if cheatNoSleep = 0:
+			gs 'indik', '1', pcs_sleep, pcs_sleep
+			$stat_extra_msg += '<BR><<$ind>> Sleep'
+		end
+	end
+end
+
+!!----------------Extra messages, start--------------------------
+
+!!----------------▽Attributes--------------------------
+if Enable_showattr = 0:
+	$stat_tool_msg += '<a href="exec:Enable_showattr = 1 & gs ''$menu_obnovit''">▽Attributes</a>'
+else
+	$stat_tool_msg += '<a href="exec:Enable_showattr = 0 & gs ''$menu_obnovit''">▲Attributes</a>'
+	!skip if this is first message
+	if $stat_extra_msg ! null: $stat_extra_msg += '<br><a href="exec:Enable_showattr = 0 & gs ''$menu_obnovit''">▲Attributes:</a>'
+	
+	
+	expadj = func('_difficulty','getexpadj')
+
+	if Enable_attr_xp_bars = 1:
+		param_xp_table_col        = 0
+		param_xp_table_col_cnt    = attr_xp_table_col_cnt
+		param_xp_table_col_width  = attr_xp_table_col_width
+		param_xp_table_bar_height = attr_xp_table_bar_height
+		$param_xp_table_bar_color = ''
+		param_xp_table_num_color_is_dynamic = 1
+
+		$stat_extra_msg += '<br><font color="<<$st_temp>>"><table cellpadding="1" cellspacing="4" border=0>'
+		$stat_extra_msg += FUNC('indiktab', '4', pcs_inhib,  100-pcs_inhib,  'inhib',  'Inhibition', 1)
+		$stat_extra_msg += FUNC('indiktab', '4', pcs_stren,  pcs_stren,  'stren',  'Strength', 1)
+		$stat_extra_msg += FUNC('indiktab', '4', pcs_agil,   pcs_agil,   'agil',   'Agility', 1)
+		$stat_extra_msg += FUNC('indiktab', '4', pcs_vital,  pcs_vital,  'vital',  'Endurance', 1)
+		$stat_extra_msg += FUNC('indiktab', '4', pcs_intel,  pcs_intel,  'intel',  'Intelligence', 1)
+		$stat_extra_msg += FUNC('indiktab', '4', pcs_sprt,   pcs_sprt,   'sprt',   'Spirit', 1)
+		$stat_extra_msg += FUNC('indiktab', '4', pcs_react,  pcs_react,  'react',  'Reaction', 1)
+		$stat_extra_msg += FUNC('indiktab', '4', pcs_chrsm,  pcs_chrsm,  'chrsm',  'Charisma', 1)
+		$stat_extra_msg += FUNC('indiktab', '4', pcs_prcptn, pcs_prcptn, 'prcptn', 'Perception', 1)
+		if $start_type[1] ! 'nomagic': $stat_extra_msg += FUNC('indiktab', '4', pcs_magik,  pcs_magik,  'magik',  'Magic', 1)
+		if succubusflag = 1: if $start_type[1] ! 'nomagic': $stat_extra_msg += FUNC('indiktab', '4', sucexcess,  sucexcess, '',  'Succubus Energy', 1)
+		$stat_extra_msg += FUNC('indiktab', '4', pcs_apprnc,  pcs_apprnc,  'apprnc',  'Attractiveness', 1)
+		$stat_extra_msg += '</table></font>'
+		
+	else if Enable_scalepic = 2:
+		$stat_extra_msg += '<font color="<<$st_temp>>"><TABLE cellpadding="1" cellspacing="0" width="300"><TR><TD width="85%">'+FUNC('indiktab', '1', 100 - pcs_inhib, 100 - pcs_inhib)+'</TD><TD> Inhibition</TD></TR><TR><TD width="85%">'+FUNC('indiktab', '1', pcs_stren, pcs_stren)+'</TD><TD> Strength</TD></TR><TR><TD width="85%">'+FUNC('indiktab', '1', pcs_agil, pcs_agil)+'</TD><TD> Agility</TD></TR><TR><TD width="85%">'+FUNC('indiktab', '1', pcs_vital, pcs_vital)+'</TD><TD> Endurance</TD></TR><TR><TD width="85%">'+FUNC('indiktab', '1', pcs_intel, pcs_intel)+'</TD><TD> Intelligence</TD></TR><TR><TD width="85%">'+FUNC('indiktab', '1', pcs_sprt, pcs_sprt)+'</TD><TD> Spirit</TD></TR><TR><TD width="85%">'+FUNC('indiktab', '1', pcs_react, pcs_react)+'</TD><TD nowrap> Reaction</TD></TR><TR><TD width="85%">'+FUNC('indiktab', '1', pcs_chrsm, pcs_chrsm)+'</TD><TD> Charisma</TD></TR><TR><TD width="85%">'+FUNC('indiktab', '1', pcs_prcptn, pcs_prcptn)+'</TD><TD> Perception</TD></TR>'
+		if $start_type[1] ! 'nomagic': $stat_extra_msg += '<TR><TD width="85%">'+FUNC('indiktab', '1', pcs_magik, pcs_magik)+'</TD><TD> Magic</TD></TR>'
+		if succubusflag = 1: $stat_extra_msg += '<TR><TD width="85%">'+FUNC('indiktab', '1', sucexcess, sucexcess)+'</TD><TD> Succubus Energy</TD></TR>'
+		$stat_extra_msg += '<TR><TD width="85%">'+FUNC('indiktab', '1', pcs_apprnc / 2, pcs_apprnc)+'</TD><TD> Attractiveness</TD></TR>'
+		$stat_extra_msg += '</TABLE></font>'
+	else
+		gs 'indik', '1', 100 - pcs_inhib, 100 - pcs_inhib
+		$stat_extra_msg += '<BR><<$ind>> Inhibition'
+		gs 'indik', '1', pcs_stren, pcs_stren
+		$stat_extra_msg += '<BR><<$ind>> Strength'
+		gs 'indik', '1', pcs_agil, pcs_agil
+		$stat_extra_msg += '<BR><<$ind>> Agility'
+		gs 'indik', '1', pcs_vital, pcs_vital
+		$stat_extra_msg += '<BR><<$ind>> Endurance'
+		gs 'indik', '1', pcs_intel, pcs_intel
+		$stat_extra_msg += '<BR><<$ind>> Intelligence'
+		gs 'indik', '1', pcs_sprt, pcs_sprt
+		$stat_extra_msg += '<BR><<$ind>> Spirit'
+		gs 'indik', '1', pcs_react, pcs_react
+		$stat_extra_msg += '<BR><<$ind>> Reaction'
+		gs 'indik', '1', pcs_chrsm, pcs_chrsm
+		$stat_extra_msg += '<BR><<$ind>> Charisma'
+		gs 'indik', '1', pcs_prcptn, pcs_prcptn
+		$stat_extra_msg += '<BR><<$ind>> Perception'
+		if $start_type[1] ! 'nomagic':
+			gs 'indik', '1', pcs_magik, pcs_magik
+			$stat_extra_msg += '<BR><<$ind>> Magic'
+			if succubusflag = 1:
+				gs 'indik', '1', sucexcess, sucexcess
+				$stat_extra_msg += '<BR><<$ind>> Succubus energy'
+			end
+		end
+		gs 'indik', '1', pcs_apprnc / 2, pcs_apprnc
+		$stat_extra_msg += '<BR><<$ind>> Attractiveness'
+
+		$stat_extra_msg += '<BR>'
+	end
+end
+killvar '$st_temp'
+
+!!----------------▽Reputation--------------------------
+
+if Enable_showgroupsvalue = 0:
+	$stat_tool_msg += ' <a href="exec:Enable_showgroupsvalue = 1 & gs ''$menu_obnovit''">▽Reputation</a>'
+else
+	$stat_tool_msg += ' <a href="exec:Enable_showgroupsvalue = 0 & gs ''$menu_obnovit''">▲Reputation:</a>'
+	st_count=0
+	$show_table=''
+	gs 'show_table','Cool kids: <<grupvalue[1]>>','3'
+	gs 'show_table','Jocks: <<grupvalue[2]>>','3'
+	gs 'show_table','Nerds: <<grupvalue[3]>>','3'
+	gs 'show_table','Gopniks: <<grupvalue[4]>>','3'
+	gs 'show_table','Outcasts: <<grupvalue[5]>>','3'
+	gs 'show_table','Teachers: <<grupvalue[6]>>','3'
+	gs 'show_table','Pav.slut: <<fame[''pav_slut'']>>','3'
+	gs 'show_table','City slut: <<fame[''city_slut'']>>','3'
+	gs 'show_table','Hotcat rating: <<Hotcat>>','3'
+	
+	if st_count > 0 :
+		!skip if this is first message
+		if $stat_extra_msg ! null: $stat_extra_msg += '<BR><a href="exec:Enable_showgroupsvalue = 0 & gs ''$menu_obnovit''">▲Reputation:</a>'
+		$stat_extra_msg += '<BR><TABLE BORDER=1> <<$show_table>></TR></TABLE>'
+	end
+end
+!!----------------▽Skills--------------------------
+
+if Enable_showskill = 0:
+	$stat_tool_msg += ' <a href="exec:Enable_showskill = 1 & gs ''$menu_obnovit''">▽Skills</a>'
+	
+else if Enable_skill_xp_bars = 1:
+
+	param_xp_table_col        = 0
+	param_xp_table_col_cnt    = skill_xp_table_col_cnt
+	param_xp_table_col_width  = skill_xp_table_col_width
+	param_xp_table_bar_height = skill_xp_table_bar_height
+	$param_xp_table_bar_color = $skill_xp_table_bar_color
+	param_xp_table_num_color_is_dynamic = 0
+	
+	$stat_tool_msg += ' <a href="exec:Enable_showskill = 0 & gs ''$menu_obnovit''">▲Skills</a>'
+	!!----------------------▲Skills display------------------------
+	$stat_sktool_msg=''
+	$skill_xp_table = ''
+	skills_in_table = 0
+
+	!!----------------Mental skills--------------------------
+	if Enable_show_mental_skill = 0:
+		$stat_sktool_msg += ' <a href="exec:Enable_show_mental_skill = 1 & gs ''$menu_obnovit''">◇Mental</a>'
+	else
+		$stat_sktool_msg += ' <a href="exec:Enable_show_mental_skill = 0 & gs ''$menu_obnovit''">◆Mental</a>'
+		if pcs_splcstng > 0 and $start_type[1] ! 'nomagic': $skill_xp_table += FUNC('indiktab', '4', pcs_splcstng,  pcs_splcstng,  'splcstng',  'Spell Casting') & skills_in_table+=1
+		if pcs_humint   > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_humint,  pcs_humint,  'humint',  'People skills') & skills_in_table+=1
+		if pcs_persuas  > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_persuas, pcs_persuas, 'persuas', 'Persuasion') & skills_in_table+=1
+		if pcs_observ   > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_observ,  pcs_observ,  'observ',  'Observation') & skills_in_table+=1
+		
+	end
+
+	!!-----------------Sport skills--------------------------
+	if Enable_show_sport_skill = 0:
+		$stat_sktool_msg += ' <a href="exec:Enable_show_sport_skill = 1 & gs ''$menu_obnovit''">◇Sport</a>'
+	else
+	 
+		$stat_sktool_msg += ' <a href="exec:Enable_show_sport_skill = 0 & gs ''$menu_obnovit''">◆Sport</a>'
+		if pcs_jab       > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_jab,       pcs_jab,       'jab',       'Jabs') & skills_in_table+=1
+		if pcs_punch     > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_punch,     pcs_punch,     'punch',     'Power Strikes') & skills_in_table+=1
+		if pcs_kick      > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_kick,      pcs_kick,      'kick',      'Kicks') & skills_in_table+=1
+		if pcs_def       > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_def,       pcs_def,       'def',       'Defence') & skills_in_table+=1
+		if pcs_run       > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_run,       pcs_run,       'run',       'Running') & skills_in_table+=1
+		if pcs_vball     > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_vball,     pcs_vball,     'vball',     'Volleyball') & skills_in_table+=1
+		if pcs_ftbll     > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_ftbll,     pcs_ftbll,     'ftbll',     'Football') & skills_in_table+=1
+		if pcs_wrstlng   > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_wrstlng,   pcs_wrstlng,   'wrstlng',   'Wrestling') & skills_in_table+=1
+		if pcs_shoot     > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_shoot,     pcs_shoot,     'shoot',     'Marksmanship') & skills_in_table+=1
+		if pcs_bushcraft > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_bushcraft, pcs_bushcraft, 'bushcraft', 'Bushcraft') & skills_in_table+=1
+		if pcs_chess     > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_chess,     pcs_chess,     'chess',     'Chess') & skills_in_table+=1
+		if pcs_icesktng  > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_icesktng,  pcs_icesktng,  'icesktng',  'Ice Skating') & skills_in_table+=1
+		if pcs_gaming    > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_gaming,    pcs_gaming,    'gaming',    'Gaming') & skills_in_table+=1
+		if pcs_pool      > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_pool,      pcs_pool,      'pool',      'Pool') & skills_in_table+=1
+	end
+
+	!!-----------------Beauty/Modelling skills---------------
+	if Enable_show_beauty_skill = 0:
+		$stat_sktool_msg += ' <a href="exec:Enable_show_beauty_skill = 1 & gs ''$menu_obnovit''">◇Beauty</a>'
+	else
+		$stat_sktool_msg += ' <a href="exec:Enable_show_beauty_skill = 0 & gs ''$menu_obnovit''">◆Beauty</a>'
+		if pcs_makupskl > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_makupskl, pcs_makupskl, 'makupskl', 'Makeup Skill') & skills_in_table+=1
+		if pcs_danc     > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_danc,     pcs_danc,     'danc',     'Modern Dancing') & skills_in_table+=1
+		if pcs_dancero  > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_dancero,  pcs_dancero,  'dancero',  'Erotic Dancing') & skills_in_table+=1
+		if pcs_dancpol  > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_dancpol,  pcs_dancpol,  'dancpol',  'Pole Dancing') & skills_in_table+=1
+		if pcs_cheer    > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_cheer,    pcs_cheer,    'cheer',    'Cheerleading') & skills_in_table+=1
+		if pcs_mdlng    > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_mdlng,    pcs_mdlng,    'mdlng',    'Modelling') & skills_in_table+=1
+		if pcs_heels    > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_heels,    pcs_heels,    'heels',    'Heels') & skills_in_table+=1
+	end
+
+	!!---------------------Artistic skills-------------------
+	if Enable_show_art_skill = 0:
+		$stat_sktool_msg += ' <a href="exec:Enable_show_art_skill = 1 & gs ''$menu_obnovit''">◇Artistic</a>'
+	else
+		$stat_sktool_msg += ' <a href="exec:Enable_show_art_skill = 0 & gs ''$menu_obnovit''">◆Artistic</a>'
+		if pcs_vokal      > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_vokal,      pcs_vokal,      'vokal',      'Singing') & skills_in_table+=1
+		if pcs_instrmusic > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_instrmusic, pcs_instrmusic, 'instrmusic', 'Instrumental Music') & skills_in_table+=1
+		if pcs_photoskl   > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_photoskl,   pcs_photoskl,   'photoskl',   'Photography') & skills_in_table+=1
+		if pcs_artskls    > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_artskls,    pcs_artskls,    'artskls',    'Artistic Skills') & skills_in_table+=1
+		if pcs_perform    > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_perform,    pcs_perform,    'perform',    'Performance') & skills_in_table+=1
+		if pcs_musicprod  > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_musicprod,  pcs_musicprod,  'musicprod',  'Music Production') & skills_in_table+=1
+	end
+
+	!!----------------------Job skills------------------------
+	if Enable_show_job_skill = 0:
+		$stat_sktool_msg += ' <a href="exec:Enable_show_job_skill = 1 & gs ''$menu_obnovit''">◇Job</a>'
+	else
+		$stat_sktool_msg += ' <a href="exec:Enable_show_job_skill = 0 & gs ''$menu_obnovit''">◆Job</a>'
+		
+		if pcs_cleaning   > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_cleaning,  pcs_cleaning,  'cleaning',  'Cleaning Skill') & skills_in_table+=1
+		if pcs_compskl    > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_compskl,   pcs_compskl,   'compskl',   'Computer Skill') & skills_in_table+=1
+		if pcs_comphckng  > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_comphckng, pcs_comphckng, 'comphckng', 'Hacking') & skills_in_table+=1
+		if pcs_hndiwrk    > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_hndiwrk,   pcs_hndiwrk,   'hndiwrk',   'Handy-work') & skills_in_table+=1
+		if pcs_sewng      > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_sewng,     pcs_sewng,     'sewng',     'Tailoring') & skills_in_table+=1
+		if pcs_servng     > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_servng,    pcs_servng,    'servng',    'Serving') & skills_in_table+=1
+		if pcs_medcn      > 0: $skill_xp_table += FUNC('indiktab', '4', pcs_medcn,     pcs_medcn,     'medcn',     'Medicine') & skills_in_table+=1
+	end
+	
+	!skip if this is first message
+	if $stat_extra_msg ! null:
+		$stat_extra_msg += '<br><a href="exec:Enable_showskill = 0 & gs ''$menu_obnovit''">▲Skills:</a> <<$stat_sktool_msg>>'
+	else
+		$stat_extra_msg += '<br><<$stat_sktool_msg>>'
+	end
+
+	if skills_in_table > 0 :
+		$stat_extra_msg += '<font color="<<$st_temp>>"><table cellpadding="1" cellspacing="1" border=1><<$skill_xp_table>></table></font>'
+	end	
+	
+else
+	$stat_tool_msg += ' <a href="exec:Enable_showskill = 0 & gs ''$menu_obnovit''">▲Skills</a>'
+	!!----------------------▲Skills display------------------------
+	$stat_sktool_msg=''
+	st_count=0
+	$show_table=''
+	!!----------------Mental skills--------------------------
+	if Enable_show_mental_skill = 0:
+		$stat_sktool_msg += ' <a href="exec:Enable_show_mental_skill = 1 & gs ''$menu_obnovit''">◇Mental</a>'
+	else
+		$stat_sktool_msg += ' <a href="exec:Enable_show_mental_skill = 0 & gs ''$menu_obnovit''">◆Mental</a>'
+		if pcs_splcstng > 0 and $start_type[1] ! 'nomagic': gs 'show_table', '<<pcs_splcstng>> Spell Casting', '2'
+		if pcs_humint > 0: gs 'show_table', '<<pcs_humint>> People skills', '2'
+		if pcs_persuas > 0: gs 'show_table', '<<pcs_persuas>> Persuasion', '2'
+		if pcs_observ > 0: gs 'show_table', '<<pcs_observ>> Observation', '2'
+	end
+
+	!!-----------------Sport skills--------------------------
+	if Enable_show_sport_skill = 0:
+		$stat_sktool_msg += ' <a href="exec:Enable_show_sport_skill = 1 & gs ''$menu_obnovit''">◇Sport</a>'
+	else
+		$stat_sktool_msg += ' <a href="exec:Enable_show_sport_skill = 0 & gs ''$menu_obnovit''">◆Sport</a>'
+		if pcs_jab > 0: gs 'show_table', '<<pcs_jab>> Jabs', '2'
+		if pcs_punch > 0: gs 'show_table', '<<pcs_punch>> Power Strikes', '2'
+		if pcs_kick > 0: gs 'show_table', '<<pcs_kick>> Kicks', '2'
+		if pcs_def > 0: gs 'show_table', '<<pcs_def>> Defence', '2'
+		if pcs_run > 0: gs 'show_table', '<<pcs_run>> Running', '2'
+		if pcs_vball > 0: gs 'show_table', '<<pcs_vball>> Volleyball', '2'
+		if pcs_ftbll > 0: gs 'show_table', '<<pcs_ftbll>> Football', '2'
+		if pcs_wrstlng > 0: gs 'show_table', '<<pcs_wrstlng>> Wrestling', '2'
+		if pcs_shoot > 0: gs 'show_table', '<<pcs_shoot>> Marksmanship', '2'
+		if pcs_bushcraft > 0: gs 'show_table', '<<pcs_bushcraft>> Bushcraft', '2'
+		if pcs_chess > 0: gs 'show_table', '<<pcs_chess>> Chess', '2'
+		if pcs_icesktng > 0: gs 'show_table', '<<pcs_icesktng>> Ice Skating', '2'
+		if pcs_gaming > 0: gs 'show_table', '<<pcs_gaming>> Gaming', '2'
+		if pcs_pool > 0: gs 'show_table', '<<pcs_pool>> Pool', '2'
+	end
+
+	!!-----------------Beauty/Modelling skills---------------
+	if Enable_show_beauty_skill = 0:
+		$stat_sktool_msg += ' <a href="exec:Enable_show_beauty_skill = 1 & gs ''$menu_obnovit''">◇Beauty</a>'
+	else
+		$stat_sktool_msg += ' <a href="exec:Enable_show_beauty_skill = 0 & gs ''$menu_obnovit''">◆Beauty</a>'
+		if pcs_makupskl > 0: gs 'show_table', '<<pcs_makupskl>> Makeup Skill', '2'
+		if pcs_danc > 0: gs 'show_table', '<<pcs_danc>> Modern Dancing', '2'
+		if pcs_dancero > 0: gs 'show_table', '<<pcs_dancero>> Erotic Dancing', '2'
+		if pcs_dancpol > 0: gs 'show_table', '<<pcs_dancpol>> Pole Dancing', '2'
+		if pcs_cheer > 0: gs 'show_table', '<<pcs_cheer>> Cheerleading', '2'
+		if pcs_mdlng > 0: gs 'show_table', '<<pcs_mdlng>> Modelling', '2'
+		if pcs_heels > 0: gs 'show_table', '<<pcs_heels>> Heels', '2'
+	end
+
+	!!---------------------Artistic skills-------------------
+	if Enable_show_art_skill = 0:
+		$stat_sktool_msg += ' <a href="exec:Enable_show_art_skill = 1 & gs ''$menu_obnovit''">◇Artistic</a>'
+	else
+		$stat_sktool_msg += ' <a href="exec:Enable_show_art_skill = 0 & gs ''$menu_obnovit''">◆Artistic</a>'
+		if pcs_vokal > 0: gs 'show_table', '<<pcs_vokal>> Singing', '2'
+		if pcs_instrmusic > 0: gs 'show_table', '<<pcs_instrmusic>> Instrumental Music', '2'
+		if pcs_photoskl > 0: gs 'show_table', '<<pcs_photoskl>> Photography', '2'
+		if pcs_artskls > 0: gs 'show_table', '<<pcs_artskls>> Artistic Skills', '2'
+		if pcs_perform > 0: gs 'show_table', '<<pcs_perform>> Performance', '2'
+		if pcs_musicprod > 0: gs 'show_table', '<<pcs_musicprod>> Music Production', '2'
+	end
+
+	!!----------------------Job skills------------------------
+	if Enable_show_job_skill = 0:
+		$stat_sktool_msg += ' <a href="exec:Enable_show_job_skill = 1 & gs ''$menu_obnovit''">◇Job</a>'
+	else
+		$stat_sktool_msg += ' <a href="exec:Enable_show_job_skill = 0 & gs ''$menu_obnovit''">◆Job</a>'
+		if pcs_cleaning > 0: gs 'show_table', '<<pcs_cleaning>> Cleaning Skill', '2'
+		if pcs_compskl > 0: gs 'show_table', '<<pcs_compskl>> Computer Skill', '2'
+		if pcs_comphckng > 0: gs 'show_table', '<<pcs_comphckng>> Hacking', '2'
+		if pcs_hndiwrk > 0: gs 'show_table', '<<pcs_hndiwrk>> Handy-work', '2'
+		if pcs_sewng > 0: gs 'show_table', '<<pcs_sewng>> Tailoring', '2'
+		if pcs_servng > 0: gs 'show_table', '<<pcs_servng>> Serving', '2'
+		if pcs_medcn > 0: gs 'show_table', '<<pcs_medcn>> Medicine', '2'
+		if workPTU > 1: gs 'show_table','<<teachlevel>> Teacher credibility','2'
+	end
+	!skip if this is first message
+	if $stat_extra_msg ! null:
+		$stat_extra_msg += '<br><a href="exec:Enable_showskill = 0 & gs ''$menu_obnovit''">▲Skills:</a> <<$stat_sktool_msg>>'
+	else
+		$stat_extra_msg += '<br><<$stat_sktool_msg>>'
+	end
+	if st_count > 0 :
+		$stat_extra_msg += '<BR><TABLE BORDER=1><<$show_table>></TR></TABLE>'
+	end
+end
+
+killvar 'stat_sktool_msg'
+killvar 'stat_skextra_msg'
+killvar 'skill_xp_table'
+
+!!----------------▽relations--------------------------
+if Enable_showrelation = 0:
+	$stat_tool_msg += ' <a href="exec:Enable_showrelation = 1 & gs ''$menu_obnovit''">▽Relations</a>'
+else
+	$stat_tool_msg += ' <a href="exec:Enable_showrelation = 0 & gs ''$menu_obnovit''">▲Relations</a>'
+	st_count=0
+	$show_table=''
+
+	gs 'show_table', '<a href="exec:if menu_off = 0: menu_off = 1 & $npcme_loc=<<CURLOC>> & gs ''npcmenu''">...</a>','2'
+	
+	if npcme_tracked_npcs_cnt > 0 or npcme_tracked_dynpcs_cnt > 0:
+		gs 'npcmenu', 'update_table'
+		$show_table = $npc_table_stat
+	else
+		if npc_QW['A192'] > 0:gs 'show_table','Nastja: <<npc_QW[''A192'']>>','2'
+		if npc_rel['A218'] > 0:gs'show_table','Tanya: <<npc_rel[''A218'']>>','2'
+		if npc_rel['A219'] > 0:gs'show_table','Kat: <<npc_rel[''A219'']>>','2'
+		if npc_rel['A220'] > 0:gs'show_table','Vika: <<npc_rel[''A220'']>>','2'
+		if npc_rel['A93'] > 0:gs'show_table','Ira: <<npc_rel[''A93'']>>','2'
+		if npc_rel['A43'] > 0:gs'show_table','Tamara: <<npc_rel[''A43'']>>','2'
+		if alla > 0:gs'show_table','Alla: <<alla>>','2'
+		if masha > 0:gs'show_table','Masha: <<masha>>','2'
+		if npc_rel['A41'] > 0:gs'show_table','Givi Karapetovich: <<npc_rel[''A41'']>>','2'
+		if npc_rel['A42'] > 0:gs'show_table','Ashot: <<npc_rel[''A42'']>>','2'
+		if npc_rel['A57'] > 0:gs'show_table','Rex: <<npc_rel[''A57'']>>','2'
+		if npc_rel['A217'] > 0:gs'show_table','Pavlin: <<npc_rel[''A217''] >>','2'
+		if npc_rel['A69'] > 0:gs'show_table','Mikhail Nikolaevich: <<npc_rel[''A69'']>>','2'
+		if npc_rel['A89'] > 0:gs'show_table','Eugene: <<npc_rel[''A89'']>>','2'
+		if npc_rel['A112'] > 0:gs'show_table','Sergei Shulgin: <<npc_rel[''A112'']>>','2'
+		if npc_rel['A11'] > 0:gs'show_table','Vasily Shulgin: <<npc_rel[''A11'']>>','2'
+		if huntersAndreiQw > 0:gs'show_table','Hunter Andrew: <<huntersAndreiQw>>','2'
+		if huntersSergeiQw > 0:gs'show_table','Hunter Sergei: <<huntersSergeiQw>>','2'
+		if huntersIgorQw > 0:gs'show_table','Hunter Igor: <<huntersIgorQw>>','2'
+		if pcs_lovers[0] = 1:gs'show_table', 'BF <<$loverdesc[0]>>: <<loverrelation[0]>>','2'
+		if pcs_lovers[1] = 1:gs'show_table', 'BF <<$loverdesc[1]>>: <<loverrelation[1]>>','2'
+		if pcs_lovers[2] = 1:gs'show_table', 'BF <<$loverdesc[2]>>: <<loverrelation[2]>>','2'
+		if mid($start_type,1,2) = 'sg':
+			if npc_rel['A29'] > 0:gs'show_table','Mother: <<npc_rel[''A29'']>>','2'
+			if npc_rel['A28'] > 0:gs'show_table','Father: <<npc_rel[''A28'']>>','2'
+			if npc_rel['A33'] > 0:gs'show_table','Sister: <<npc_rel[''A33'']>>','2'
+			if npc_rel['A34'] > 0:gs'show_table','Brother: <<npc_rel[''A34'']>>','2'
+		end	
+	end
+
+	if st_count > 0 :
+		!skip if this is first message
+		if $stat_extra_msg ! null: $stat_extra_msg += '<BR><a href="exec:Enable_showrelation = 0 & gs ''$menu_obnovit''">▲Relations:</a>'
+		$stat_extra_msg += '<BR><TABLE BORDER=1> <<$show_table>></TR></TABLE>'
+	end
+end
+
+
+!!----------------▽image, default to toolbar, can move to top or bottom from setting--------------------------
+if Enable_statimg_loc = 0:
+	if Enable_showstatimg = 0:
+		$stat_tool_msg += ' <a href="exec:Enable_showstatimg = 1 & gs ''$menu_obnovit''">▽Image</a>'
+	else
+		$stat_tool_msg += ' <a href="exec:Enable_showstatimg = 0 & gs ''$menu_obnovit''">▲Image</a>'
+		!skip if this is first message
+		if $stat_extra_msg ! null:
+			$stat_extra_msg += '<br><a href="exec:Enable_showstatimg = 0 & gs ''$menu_obnovit''">▲Image:</a> <<$stat_imgtool_msg>>'
+		else
+			$stat_extra_msg += '<br><<$stat_imgtool_msg>>'
+		end
+		$stat_extra_msg += '<br><<$stat_imgextra_msg>>'
+	end
+end
+
+if enable_extra_msg = 0:
+	$stat_tool_msg += ' <a href="exec: enable_extra_msg = 1 & gs ''stat'' ">▽Texts</a>'
+else
+	$stat_tool_msg += ' <a href="exec: enable_extra_msg = 0 & gs ''stat''">▲Texts</a>'
+end
+
+!all end, push back and clean up
+$stat_msg += '<br>'
+$stat_msg += func('cleanHTML',$stat_tool_msg)
+if $stat_extra_msg ! NULL : $stat_msg += func('cleanHTML',$stat_extra_msg)
+$stat_msg += '<br>'
+killvar 'stat_tool_msg'
+killvar 'stat_extra_msg'
+
+!!----------------Extra messages, End--------------------------
+
+if enable_extra_msg = 1:
+	if opPRE = 0: $stat_msg += '<BR><<$pcs_makeup>> and your hair is <<$pcs_hairbsh>>.' & !$stat_msg += '<BR>'
+
+	if thinkpreg = 0 and knowpreg = 0 and cycle ! 6 and pillcon2 <= 30000 and succubusflag ! 1 and cheatSlut = 0 and mesec = 0:
+		if abortionbirthdate = 0 and daystart - daylastperiod > 28:
+			if (daystart - daylastperiod > 28) and (daystart - daylastperiod <= 35):
+				$stat_msg += '<BR><font color = #AB052A><b>Your period is late by <<daystart - daylastperiod - 28>> days.</b></font>'
+			elseif (daystart - daylastperiod > 35) and (daystart - daylastperiod <= 42):
+				$stat_msg += '<BR><font color = #AB052A><b>Your period is late by more than a week!</b></font>'
+			elseif (daystart - daylastperiod > 42) and (daystart - daylastperiod <= 56):
+				$stat_msg += '<BR><font color = #AB052A><b>Your period is late by more than two weeks! Maybe you should see a doctor?</b></font>'
+			elseif (daystart - daylastperiod > 56) and (daystart - daylastperiod <= 84):
+				$stat_msg += '<BR><font color = #AB052A><b>Your period is late by more than a month! You really should see a doctor about it.</b></font>'
+			elseif daystart - daylastperiod > 84:
+				$stat_msg += '<BR><font color = #AB052A><b>You should consider the possibility of a pregnancy, since apparently you no longer have periods.</b></font>'
+			end
+		!!Recovery period after an abortion is ~14-21 days
+		elseif abortionbirthdate ! 0 and daystart - abortionbirthdate <= 13:
+			$stat_msg += '<BR><font color = #705243><b>You are still in your recovery period. Nothing to worry about.</b></font>'
+		elseif abortionbirthdate ! 0 and daystart - abortionbirthdate > 13 and daystart - abortionbirthdate <= 16:
+			$stat_msg += '<BR><font color = #705243><b>You are maybe still in your recovery period, but there could be a risk.</b></font>'
+		elseif abortionbirthdate ! 0 and daystart - abortionbirthdate > 16 and daystart - abortionbirthdate <= 21:
+			$stat_msg += '<BR><font color = #820000><b>You should have recovered from you abortion by know... Right?</b></font>'
+		elseif abortionbirthdate ! 0 and daystart - abortionbirthdate > 21:
+			$stat_msg += '<BR><font color = #820000><b>You should have definitely recovered from your abortion by now.</b></font>'
+		!!Recovery period after giving birth is ~42-70 days
+		elseif pregbirthdate ! 0 and daystart - pregbirthdate <= 41:
+			$stat_msg += '<BR><font color = #705243><b>You are still in your recovery period. Nothing to worry about.</b></font>'
+		elseif pregbirthdate ! 0 and daystart - pregbirthdate > 41 and daystart - pregbirthdate <= 48:
+			$stat_msg += '<BR><font color = #705243><b>You are probably still in your recovery period.</b></font>'
+		elseif pregbirthdate ! 0 and daystart - pregbirthdate > 48 and daystart - pregbirthdate <= 55:
+			$stat_msg += '<BR><font color = #705243><b>You are maybe still in your recovery period, but there could be a risk.</b></font>'
+		elseif pregbirthdate ! 0 and daystart - pregbirthdate > 55 and daystart - pregbirthdate <= 70:
+			$stat_msg += '<BR><font color = #820000><b>You should have recovered by know... Right?</b></font>'
+		elseif pregbirthdate ! 0 and daystart - pregbirthdate > 70:
+			$stat_msg += '<BR><font color = #820000><b>You should have definitely recovered from giving birth by now.</b></font>'
+		end
+	end
+
+	if implant_day > 0 and ((daystart - implant_day) * 24 + hour - implant_hour) < 5:
+		$stat_msg += '<BR><font color=#AB052A>You feel a slight twinge in your abdomen.</font>'
+	end
+
+	if mesec > 0:
+		$stat_msg += '<BR><font color="red">You are currently having your period. '
+		if isprok = 0 and isprokp = 0:
+			$stat_msg += 'You need to use your feminine hygiene products.'
+		elseif isprokp = 1 and $pantyworntype = 'none':
+			isprokp = 0
+			$stat_msg += 'You need to wear panties to use a sanitary pad.'
+		end
+		$stat_msg += '</font>'
+	elseif placebopart > 0 and LutH > 0 and knowpreg = 0:
+		$stat_msg += '<BR><font color="red">Your period is due to start soon.'
+		$stat_msg += '</font>'
+	end
+
+	if $cycreport_txt ! null and menu_off = 0:
+		$stat_msg += '<BR><a href="exec:dynamic $d_cycreport_choice"><<$cycreport_txt>></a><br>'
+	elseif $cycreport_txt ! null and menu_off = 1:
+		$stat_msg += '<BR><a href="exec:gs ''obj_din'', ''menu_disabled''"><<$cycreport_txt>></a><br>'
+	end
+
+	!!if shame > 0:$stat_msg += '<BR><<$shame>>' & $stat_msg += '<BR>'
+
+	if $pcs_mood ! '': $stat_msg += '<BR><font color="green"><b><<$pcs_mood>></b></font>'
+	if mentats_dose >= 1: $stat_msg += '<BR><font color = green>You feel sharp and focused.</font>'
+	if bcream_used = 1: $stat_msg += '<BR><font color = #DB7093>Your breasts are feeling hot and tingly.</font>'
+	if aphrodisiac_timer > 0: $stat_msg += '<BR><font color = #DB7093>You are feeling hot, and every move causes your groin to tingle.</font>'
+
+	if cheatNoEat = 0 and $stat_hunger_msg ! '' and pcs_energy < 5:
+		$stat_msg += '<BR><font color="red"><b><<$stat_hunger_msg>></b></font>'
+	elseif cheatNoEat = 0 and $stat_hunger_msg ! ''  and pcs_energy < 10:
+		$stat_msg += '<BR><font color="red"><<$stat_hunger_msg>></font>'
+	elseif cheatNoEat = 0 and $stat_hunger_msg ! ''  and pcs_energy < 20:
+		$stat_msg += '<BR><<$stat_hunger_msg>>'
+	elseif cheatNoEat = 0 and $stat_hunger_msg ! ''  and pcs_energy < 30:
+		$stat_msg += '<BR><<$stat_hunger_msg>>'
+	end
+
+	if cheatNoDrink = 0 and $stat_thirst_msg ! '' and pcs_hydra < 5:
+		$stat_msg += '<BR><font color="red"><b><<$stat_thirst_msg>></b></font>'
+	elseif cheatNoDrink = 0 and $stat_thirst_msg ! '' and pcs_hydra < 10:
+		$stat_msg += '<BR><font color="red"><<$stat_thirst_msg>></font>'
+	elseif cheatNoDrink = 0 and $stat_thirst_msg ! '' and pcs_hydra < 20:
+		$stat_msg += '<BR><<$stat_thirst_msg>>'
+	elseif cheatNoDrink = 0 and $stat_thirst_msg ! '' and pcs_hydra < 30:
+		$stat_msg += '<BR><<$stat_thirst_msg>>'
+	end
+
+	if cheatNoSleep= 0 and $stat_sleep_msg ! '' and pcs_sleep < 5:
+		$stat_msg += '<BR><font color="red"><b><<$stat_sleep_msg>></b></font>'
+	elseif cheatNoSleep= 0 and $stat_sleep_msg ! '' and pcs_sleep < 10:
+		$stat_msg += '<BR><font color="red"><<$stat_sleep_msg>></font>'
+	elseif cheatNoSleep= 0 and $stat_sleep_msg ! '' and pcs_sleep < 20:
+		$stat_msg += '<BR><<$stat_sleep_msg>>'
+	elseif cheatNoSleep= 0 and $stat_sleep_msg ! '' and pcs_sleep < 30:
+		$stat_msg += '<BR><<$stat_sleep_msg>>'
+	end
+
+	if pcs_horny >= 50:
+		if pcs_horny < 90 and $pantyworntype ! 'none':
+			$stat_msg += '<BR><font color = #DB7093>You are a little nervous, feeling nice between your legs <a href="exec:view''images/pc/body/pussy/aroused/panties_low.jpg''">itchy</a> from arousal.</font>'
+		elseif pcs_horny < 90 and $pantyworntype = 'none':
+			$stat_msg += '<BR><font color = #DB7093>You are a little nervous, feeling nice between your legs <a href="exec:view''images/pc/body/pussy/aroused/none_low.jpg''">itchy</a> from arousal.</font>'
+		elseif $pantyworntype ! 'none':
+			$stat_msg += '<BR><font color = #FF1493>You can''t stop thinking about sex. Between your legs, you are <a href="exec:view''images/pc/body/pussy/aroused/panties_high.jpg''">soaked</a> from your juices.</font>'
+		else
+			$stat_msg += '<BR><font color = #FF1493>You can''t stop thinking about sex. Between your legs, you are <a href="exec:view''images/pc/body/pussy/aroused/none_high.jpg''">soaked</a> from your juices.</font>'
+		end
+	end
+
+	if smoker >= 20 and NarkImmune = 0:
+		if smokerNeed > 0:
+			if siga > 0:
+				$stat_msg += '<BR><a href="exec:gs ''drugs'',''smoke''"><font color="red"><b>You want to smoke. You have <<siga>> cigarettes left.</b></font></a><BR>'
+			else
+				$stat_msg += '<BR><font color="red"><b>You want to smoke, but you have no cigarettes left.</b></font><BR>'
+			end
+		else
+			if siga > 0:
+				$stat_msg += '<BR><a href="exec:gs ''drugs'',''smoke''"><font color=#0064FF><b>You have <<siga>> cigarettes left.</b></font></a><BR>'
+			else
+				$stat_msg += '<BR><font color=#0064FF><b>You feel like you should get some cigarettes.</b></font><BR>'
+			end
+		end
+	elseif siga > 0:
+		$stat_msg += '<BR><a href="exec:gs ''drugs'',''smoke''"><font color=#0064FF><b>You have <<siga>> cigarettes.</b></font></a><BR>'
+	end
+
+	if smokeHour = hour and smokeday = daystart and smokeminut >= minut: $stat_msg += '<BR><font color="green">You are smoking a cigarette.</font><BR>'
+	if jointhour = hour and jointday = daystart and jointminut >= minut: $stat_msg += '<BR><font color="green">You are smoking a joint.</font><BR>'
+
+	if cheatNoSweat = 0 and pcs_sweat > 59:
+		$stat_msg += '<br><b><font color="red"><<$stat_sweat_msg>></font></b><br>'
+	elseif cheatNoSweat = 0 and pcs_sweat > 49:
+		$stat_msg += '<br><b><font color="red"><<$stat_sweat_msg>></font></b>'
+	elseif cheatNoSweat = 0 and pcs_sweat > 39:
+		$stat_msg += '<br><font color="red"><<$stat_sweat_msg>></font>'
+	elseif cheatNoSweat = 0 and pcs_sweat > 29:
+		$stat_msg += '<br><font color="red"><<$stat_sweat_msg>></font>'
+	elseif cheatNoSweat = 0 and pcs_sweat > 19:
+		$stat_msg += '<br><font color="brown"><<$stat_sweat_msg>></font>'
+	elseif cheatNoSweat = 0 and pcs_sweat > 9 and deodorant_on = 1:
+		$stat_msg += '<br><b><font color="green"><<$stat_sweat_msg>></font>'
+	elseif cheatNoSweat = 0 and arrsize('sparrvol') = 0:
+		$stat_msg += '<br><b><font color="green"><<$stat_sweat_msg>></font></b>'
+	elseif cheatNoSweat = 0 and deodorant_on = 1:
+		$stat_msg += '<br><b><font color="green"><<$stat_sweat_msg>></font></b>'
+	end
+
+	!!	breast status
+	gs 'lact_lib','breast_stat_disp'
+
+	if $stat_writing_msg ! '': $stat_msg += '<br><b><font color = red><<$stat_writing_msg>></font></b>'
+
+	if recuperation = 1: $stat_msg += '<b><font color="red">You are still recovering from major surgery.</font></b>'
+
+	$stat_msg += $stat_cum_text
+
+	!!stds
+	if Gerpes >= 10 and GenHerpes = 1:
+		$stat_msg += '<BR><b><font color="red">Sores have appeared on your vagina. You have genital herpes.</font></b>'
+	elseif Gerpes >= 5 and GenHerpes =1:
+		$stat_msg += '<BR><b><font color="red">Your vagina is red and very itchy. You have genital herpes.</font></b>'
+	elseif Gerpes >= 3 and Orerpes = 1:
+		$stat_msg += '<BR><b><font color="red">You have cold sores on your lips. You have oral herpes.</font></b>'
+	end
+	if Gerpes >= 20 and GenHerpes =1:$stat_msg += '<BR> <b><font color="red">The herpes sores also cover your ass.</font></b>'
+	if Sifilis >= 50:
+		$stat_msg += '<BR><b><font color="red">Syphilitic rashes cover your whole body.</font></b>'
+	elseif Sifilis >= 21:
+		$stat_msg += '<BR><b><font color="red">You have a single large, hard sore on the lip. You have syphilis.</font></b>'
+	end
+	if Triper > 2:$stat_msg += '<BR><b><font color="red">There''s a white discharge and a strong smell coming from your vagina, and it stings when urinating. You have gonorrhea.</font></b>'
+	if Kandidoz > 30:$stat_msg += '<BR><b><font color="red">There''s a white discharge and strong smell from your vagina. You have yeast infection.</font></b>'
+
+	!!drug withdrawal
+	if SLomka > 0:$stat_msg += '<BR><b><font color="red">You are very weak and hurt to the bone. You''re suffering withdrawal.</font></b>'
+	if narkday ! daystart and narkoman = 1:$stat_msg += '<BR><b><font color="red">You are very weak and hurt to the bone. You urgently need some cocaine.</font></b>'
+
+	! WD: Bimbo look
+	if bimbolevel > 0: $stat_msg += '<BR><<$bimbostatus>>'
+
+	if analplugIN = 1:$stat_msg += '<BR><font color = #FF1493>You have a butt plug inserted in your ass.</font>'
+	if vibratorin = 1:$stat_msg += '<BR><font color = #FF1493>You have a vibrator inserted in your vagina.</font>'
+
+	if alko > 0 and alko = 1:
+		$stat_msg += '<br><b><font color="green">You feel a little buzz from drinking.</font></b>'
+	elseif alko > 0 and alko < 4:
+		$stat_msg += '<br><b><font color="orange">You''re feeling a bit tipsy.</font></b>'
+	elseif alko > 0 and alko < 6:
+		$stat_msg += '<br><b><font color="orange">You''re drunk.</font></b>'
+	elseif alko > 0 and alko < 10:
+		$stat_msg += '<br><b><font color="red">You''re very drunk.</font></b>'
+	elseif alko > 0:
+		$stat_msg += '<br><b><font color="red">You''re wasted.</font></b>'
+	end
+
+	if $stat_frost_msg ! '': $stat_msg += '<BR><b><font color="red"><<$stat_frost_msg>></font></b>'
+
+	if $stat_sick_msg ! '': $stat_msg += '<BR><b><font color="red"><<$stat_sick_msg>></font></b>'
+
+	$stat_msg += $stat_bra_text
+	$stat_msg += $stat_panty_text
+	$stat_msg += $stat_clothes_text
+
+	if SchoolBlock = 0:
+		if $stat_school_msg ! '' and mid($start_type,1,2) = 'sg' and SchoolAtestat = 0 and kanikuli = 0 and week < 6 and hour < 9:
+			$stat_msg += '<BR><b><<$stat_school_msg>></b>'
+		elseif $stat_school_msg ! '' and mid($start_type,1,2) = 'sg' and SchoolAtestat = 0 and week = 6 and hour < 9 and detention_set = 1 and SchoolAtestat = 0:
+			$stat_msg += '<BR><b><<$stat_school_msg>></b>'
+		end
+	end
+end
+
+!!------------------ Things without an icon (Start) -------------------
+
+if fingal > 0:$stat_msg += '<BR><b><font color="red">You have a black eye.</font></b>'
+
+if mosol >= 50:
+	$stat_msg += '<BR><b><font color="red">Your pussy itches a great deal and is affecting your mood. You should use some cream or stop wearing pants without underwear.</font></b>'
+elseif mosol >= 30:
+	$stat_msg += '<BR><b><font color="red">Your pussy feels a little itchy. It seems to be from rubbing against your clothing.</font></b>'
+end
+
+if $pantyworntype ! 'none' and clit_size >= 25: $stat_msg += '<BR><font color = #FF1493>Your panties keep rubbing against your clit and making you horny.</font>'
+
+if $mudnerd ! '':$stat_msg += '<BR><<$mudnerd>>'
+
+if $home['current'] = 'city_apartment':
+	$streetev_home = 'your apartment'
+elseif $home['location'] = 'pav_complex':
+	$streetev_home = 'your apartment block'
+elseif $home['current'] = 'village_cottage':
+	$streetev_home = 'your cottage'
+elseif $home['current'] = 'old_town_apartment':
+	$streetev_home = 'your apartment building at Okhlopkov Square'
+elseif $home['current'] = 'matryona_mansion':
+	$streetev_home = 'the entrance to your mansion'
+elseif $home['current'] = 'pavlovsk_hotel':
+	$streetev_home = 'the hotel at Pavlovsk market.'
+elseif $home['current'] = 'maid_bedroom':
+	$streetev_home = 'Tanya''s apartment'
+elseif $home['current'] = 'niko_apartment':
+	$streetev_home = 'Niko''s apartment block'
+elseif $home['current'] = 'lyceum_dorm':
+	$streetev_home = 'High Street in the Pavlovsk Comercial District'
+elseif $home['current'] = 'university_dorm':
+	$streetev_home = 'your dorm'
+elseif $home['town'] = 'gadukino':
+	$streetev_home = 'the street in Gadukino'
+elseif $home['current'] = 'city_house':
+	$streetev_home = 'your house'
+elseif $home['current'] = 'meynold_household':
+	$streetev_home = 'the Meynold Residence'
+else
+	$streetev_home = 'the city center'
+end
+
+if StrongNarkota > 20 or jointhigh > 0:$stat_msg += '<BR><b><font color="red">You are stoned.</font></b>'
+if amphHigh > 0: $stat_msg += '<BR><b><font color="red">You feel a little wired.</font></b>'
+
+!!--------------- mid($start_type,1,2) = 'sg' Events (Start) ------------------------
+
+if mid($start_type,1,2) = 'sg' and sisboyday + 1 = daystart and hour < 18 and (npc_QW['A33'] = 3 or npc_QW['A33'] = 5 or npc_QW['A33'] = 7 or (npc_QW['A33'] >= 9 and sisboytrioQW ! 1)):$stat_msg += '<BR>' & $stat_msg += '<BR>You promised your sister not to go into your room at 16:00.'
+if mid($start_type,1,2) = 'sg' and sisboyday + 1 = daystart and hour < 18 and sisboytrioQW = 1:$stat_msg += '<BR>' & $stat_msg += '<BR>You promised your sister to meet her in your room at 16:00.'
+
+if mid($start_type,1,2) = 'sg' and day = nyp_day and month = 12 and SchoolAtestat = 0 and hour >= 5 and hour <= 14 and mid($start_type,1,2) = 'sg':
+	$stat_msg += '<BR>At 14:00, your school''s New Year''s party will start.'
+elseif mid($start_type,1,2) = 'sg' and InvitationToDimkaNYparty = 1 and month = 12 and day = 31:
+	$stat_msg += '<BR><b>Go to the residential area between 15:00 and 18:00 to go to Dimka''s New Year party.</b>'
+end
+if mid($start_type,1,2) = 'sg' and gopnik_initiation = 1 and gopnik_initiation_day = daystart and hour > 15 and hour < 21: $stat_msg += '<BR><b>Meet Lena and Lera at the apartment garages at eight.</b>'
+if mid($start_type,1,2) = 'sg' and nerd_night_game = 1 and nerd_night_game_day = daystart and hour > 15 and hour < 21: $stat_msg += '<BR><b>Join nerds at the community center at eight.</b>'
+
+!!--------------- mid($start_type,1,2) = 'sg' Events (End) ------------------------
+
+if accessible_property['city_house'] = 1 and accessible_property['old_town_apartment'] > 0:
+	$stat_msg += '<BR>You have rented an apartment in the city residential area, which is paid up for <b><<func(''homes_properties'', ''get_rent_days'', ''city_apartment'')>></b> days, and you also have an apartment in Pushkin, which is paid up for <b><<func(''homes_properties'', ''get_rent_days'', ''old_town_apartment'')>></b> days. Utilities are due on the 25th of <<$month>>.'
+elseif accessible_property['city_house'] = 1:
+	$stat_msg += '<BR>You have rented an apartment in the city residential area, and you''re paid up for <<func(''homes_properties'', ''get_rent_days'', ''city_apartment'')>> days. Utilities are due on the 25th of <<$month>>.'
+elseif accessible_property['old_town_apartment'] > 0:
+	$stat_msg += '<BR>You have rented an apartment in Pushkin, and you''re paid up for <<func(''homes_properties'', ''get_rent_days'', ''old_town_apartment'')>> days. Utilities are due on the 25th of <<$month>>.'
+end
+
+if $nichStatMsg ! '': $stat_msg += '<br><b><<$nichStatMsg>></b>'
+
+if npc_QW['A113'] = 1: $stat_msg += '<br>You owe Vadim Bely <<belgangpay>> <b><b>₽</b></b>, and you need to pay him <<belgangpayweek>> <b>₽</b></b> this week.'
+
+!!------------------ Things without an icon (End) -------------------
+
+!!------------------ Gadukino chores and such -------------------
+if display_bb = 1:
+	if boletus + boletus_cooked + bilberry > 0:
+		$stat_msg += '<br> '
+		if boletus + boletus_cooked + bilberry >= 5:
+			$stat_msg +='<br><font color = Olive>Your basket is full, and you cannot carry more. </font> '
+		else
+			$stat_msg +='<br><font color = Olive>Your basket is partially full. </font>'
+		end
+		$stat_msg += '<br><font color = Olive>(Click numbers to throw away one a time) </font>'
+		if boletus > 0:$stat_msg +='<br><font color = Olive>Mushrooms: <a href="exec:boletus -= 1 & gs ''stat''"><b><<boletus>></b></a> kg. </font>'
+		if boletus_cooked > 0:$stat_msg +='<br><font color = Olive>Cooked Mushrooms: <a href="exec:boletus_cooked -= 1 & gs ''stat''"><b><<boletus_cooked>></b></a> kg. </font>'
+		if bilberry > 0:$stat_msg +='<br><font color = Olive>Berries: <a href="exec:bilberry -= 1 & gs ''stat''"><b><<bilberry>></b></a> kg. </font>'
+	end
+end
+
+!! Grandma chores
+if grandmaQW['chore_clean_floor'] = 1:
+    $stat_msg += '<br><b>You promised Grandma you would clean the floors in her house today.</b>'
+elseif grandmaQW['chore_clean_floor'] = 2:
+    $stat_msg += '<br><b>You cleaned the floors for Grandma - you should let her know that it is done.</b>'
+elseif grandmaQW['chore_wash_clothes'] = 1:
+    $stat_msg += '<br><b>You promised Grandma you would wash clothes for her today.</b>'
+elseif grandmaQW['chore_wash_clothes'] = 2:
+    $stat_msg += '<br><b>You washed clothes for Grandma - you should let her know that it is done.</b>'
+elseif grandmaQW['chore_milk_cow'] = 1:
+    $stat_msg += '<br><b>You promised Grandma you would milk the cow in the barn for her today.</b>'
+elseif grandmaQW['chore_milk_cow'] = 2:
+    $stat_msg += '<br><b>You milked the cow for Grandma - you should let her know that it is done.</b>'
+elseif grandmaQW['chore_groceries'] = 1:
+    $stat_msg += '<br><b>You promised Grandma you would go get groceries for her today.</b>'
+elseif grandmaQW['chore_groceries'] = 2:
+    $stat_msg += '<br><b>You got the groceries for Grandma - you should go give them to her.</b>'
+elseif grandmaQW['chore_can_mushrooms'] = 1:
+    $stat_msg += '<br><b>You promised Grandma you would help her can mushrooms today.</b>'
+elseif grandmaQW['chore_can_berries'] = 1:
+    $stat_msg += '<br><b>You promised Grandma you would help her can berries today.</b>'
+elseif grandmaQW['can_veggies'] = 1:
+    $stat_msg += '<br><b>You promised Grandma you would help her can vegetables today.</b>'
+elseif grandmaQW['chore_feed_chickens'] = 1:
+    $stat_msg += '<br><b>You promised Grandma you would feed the chickens for her today.</b>'
+elseif grandmaQW['chore_feed_chickens'] = 2:
+    $stat_msg += '<br><b>You fed the chickens for Grandma - you should let her know that it is done.</b>'
+elseif grandmaQW['chore_work_in_garden'] = 1:
+    $stat_msg += '<br><b>You promised Grandma you would work in the garden today.</b>'
+elseif grandmaQW['chore_work_in_garden'] = 2:
+    $stat_msg += '<br><b>You worked in the garden for Grandma - you should let her know that it is done.</b>'
+elseif grandmaQW['chore_water_garden'] = 1:
+    $stat_msg += '<br><b>You promised Grandma you would water the plants in the garden today.</b>'
+elseif grandmaQW['chore_water_garden'] = 2:
+    $stat_msg += '<br><b>You watered the plants in the garden for Grandma - you should let her know that it is done.</b>'
+elseif grandmaQW['chore_collect_strawberries'] = 1:
+    $stat_msg += '<br><b>You promised Grandma you would pick strawberries from the garden for her today.</b>'
+elseif grandmaQW['chore_collect_strawberries'] = 2:
+    $stat_msg += '<br><b>You picked strawberries for Grandma - you should give them to her.</b>'
+elseif grandmaQW['chore_collect_fruit'] = 1:
+    $stat_msg += '<br><b>You promised Grandma you would collect fruit from the garden for her today.</b>'
+elseif grandmaQW['chore_collect_fruit'] = 2:
+    $stat_msg += '<br><b>You collected fruit for Grandma - you should give them to her.</b>'
+elseif grandmaQW['chore_harvest_garden'] = 1:
+    $stat_msg += '<br><b>You promised Grandma you would harvest vegetables from the garden for her today.</b>'
+elseif grandmaQW['chore_harvest_garden'] = 2:
+    $stat_msg += '<br><b>You harvested vegetables for Grandma - you should give them to her.</b>'
+elseif grandmaQW['chore_gather_mushrooms'] > 0 and grandmaQW['chore_gather_mushrooms'] < 3:
+	if boletus < grandmaQW['chore_mushroom_quantity']:
+		grandmaQW['chore_gather_mushrooms'] = 1
+		$stat_msg += '<br><b>You promised Grandma you would pick <<grandmaQW[''chore_mushroom_quantity'']>> kg of mushrooms for her today.</b>'
+	else
+		grandmaQW['chore_gather_mushrooms'] = 2
+		$stat_msg += '<br><b>You have picked the <<grandmaQW[''chore_mushroom_quantity'']>> kg of mushrooms that Grandma asked for - you should give them to her.</b>'
+	end
+elseif grandmaQW['chore_gather_berries'] > 0 and grandmaQW['chore_gather_berries'] < 3:
+	if bilberry < grandmaQW['chore_berry_quantity']:
+		grandmaQW['chore_gather_berries'] = 1
+		$stat_msg += '<br><b>You promised Grandma you would pick <<grandmaQW[''chore_berry_quantity'']>> kg of berries for her today.</b>'
+	else
+		grandmaQW['chore_gather_berries'] = 2
+		$stat_msg += '<br><b>You have picked the <<grandmaQW[''chore_berry_quantity'']>> kg of berries that Grandma asked for - you should give them to her.</b>'
+	end
+elseif grandmaQW['chore_gather_both'] > 0 and grandmaQW['chore_gather_both'] < 3:
+	if bilberry < grandmaQW['chore_berry_quantity'] or boletus < grandmaQW['chore_mushroom_quantity']:
+		grandmaQW['chore_gather_both'] = 1
+		$stat_msg += '<br><b>You promised Grandma you would pick <<grandmaQW[''chore_mushroom_quantity'']>> kg of mushrooms and <<grandmaQW[''chore_berry_quantity'']>> kg of berries for her today.</b>'
+	else
+		grandmaQW['chore_gather_both'] = 2
+		$stat_msg += '<br><b>You have picked the <<grandmaQW[''chore_mushroom_quantity'']>> kg of mushrooms and <<grandmaQW[''chore_berry_quantity'']>> kg of berries that Grandma asked for - you should give them to her.</b>'
+	end
+end
+
+!! Grandpa chores
+if grandpaQW['chore_fetch_firewood'] = 1:
+    $stat_msg += '<br><b>You promised Grandpa you would fetch firewood for him today.</b>'
+elseif grandpaQW['chore_fetch_firewood'] = 2:
+    $stat_msg += '<br><b>You fetched some firewood for Grandpa - you should give it to him.</b>'
+elseif grandpaQW['chore_feed_horse'] = 1:
+    $stat_msg += '<br><b>You promised Grandpa you would feed the horse in the barn for him today.</b>'
+elseif grandpaQW['chore_feed_horse'] = 2:
+    $stat_msg += '<br><b>You fed the horse for Grandpa - you should let him know that it is done.</b>'
+elseif grandpaQW['chore_feed_cow'] = 1:
+    $stat_msg += '<br><b>You promised Grandpa you would feed the cow in the barn for him today.</b>'
+elseif grandpaQW['chore_feed_cow'] = 2:
+    $stat_msg += '<br><b>You fed the cow for Grandpa - you should let him know that it is done.</b>'
+elseif grandpaQW['chore_clean_yard'] = 1:
+    $stat_msg += '<br><b>You promised Grandpa you would clean the yard for him today.</b>'
+elseif grandpaQW['chore_clean_yard'] = 2:
+    $stat_msg += '<br><b>You cleaned the yard for Grandpa - you should let him know that it is done.</b>'
+elseif grandpaQW['chore_brush_horse'] = 1:
+    $stat_msg += '<br><b>You promised Grandpa you would groom the horse for him today.</b>'
+elseif grandpaQW['chore_brush_horse'] = 2:
+    $stat_msg += '<br><b>You groomed the horse for Grandpa - you should let him know that it is done.</b>'
+elseif grandpaQW['chore_feed_boar'] = 1:
+    $stat_msg += '<br><b>You promised Grandpa you would feed the pig in the barn for him today.</b>'
+elseif grandpaQW['chore_feed_boar'] = 2:
+    $stat_msg += '<br><b>You fed the pig for Grandpa - you should let him know that it is done.</b>'
+elseif grandpaQW['chore_lead_horse_to_field'] = 1:
+    $stat_msg += '<br><b>You promised Grandpa you would take the horse from the barn to the field for him today.</b>'
+elseif grandpaQW['chore_lead_horse_to_field'] = 2:
+    $stat_msg += '<br><b>You took the horse to the field for Grandpa - you should let him know that it is done.</b>'
+elseif grandpaQW['chore_lead_cow_to_field'] = 1:
+    $stat_msg += '<br><b>You promised Grandpa you would take the cow from the barn to the field for him today.</b>'
+elseif grandpaQW['chore_lead_cow_to_field'] = 2:
+    $stat_msg += '<br><b>You took the cow to the field for Grandpa - you should let him know that it is done.</b>'
+elseif grandpaQW['chore_bathe_horse'] = 1:
+    $stat_msg += '<br><b>You promised Grandpa you would take the horse from the barn and bathe it in the river for him today.</b>'
+	if grandpaQW['chore_bathe_horse_prog'] = 1:
+		$stat_msg += '<br><b>You have taken the horse to the river, but haven''t bathed him yet.</b>'
+	elseif grandpaQW['chore_bathe_horse'] = 2:
+		$stat_msg += '<br><b>You have bathed the horse in the river, but haven''t led him back home yet.</b>'
+	end
+elseif grandpaQW['chore_bathe_horse'] = 2:
+    $stat_msg += '<br><b>You bathed the horse for Grandpa - you should let him know that it is done.</b>'
+elseif grandpaQW['chore_gather_mushrooms'] > 0 and grandpaQW['chore_gather_mushrooms'] < 3:
+	if boletus < grandpaQW['chore_mushroom_quantity']:
+		grandpaQW['chore_gather_mushrooms'] = 1
+		$stat_msg += '<br><b>You promised Grandpa you would pick <<grandpaQW[''chore_mushroom_quantity'']>> kg of mushrooms for him today.</b>'
+	else
+		grandpaQW['chore_gather_mushrooms'] = 2
+		$stat_msg += '<br><b>You have picked the <<grandpaQW[''chore_mushroom_quantity'']>> kg of mushrooms that Grandpa asked for - you should give them to him.</b>'
+	end
+elseif grandpaQW['chore_gather_berries'] > 0 and grandpaQW['chore_gather_berries'] < 3:
+	if bilberry < grandpaQW['chore_berry_quantity']:
+		grandpaQW['chore_gather_berries'] = 1
+		$stat_msg += '<br><b>You promised Grandpa you would pick <<grandpaQW[''chore_berry_quantity'']>> kg of berries for him today.</b>'
+	else
+		grandpaQW['chore_gather_berries'] = 2
+		$stat_msg += '<br><b>You have picked the <<grandpaQW[''chore_berry_quantity'']>> kg of berries that Grandpa asked for - you should give them to him.</b>'
+	end
+elseif grandpaQW['chore_gather_both'] > 0 and grandpaQW['chore_gather_both'] < 3:
+	if bilberry < grandpaQW['chore_berry_quantity'] or boletus < grandpaQW['chore_mushroom_quantity']:
+		grandpaQW['chore_gather_both'] = 1
+		$stat_msg += '<br><b>You promised Grandpa you would pick <<grandpaQW[''chore_mushroom_quantity'']>> kg of mushrooms and <<grandpaQW[''chore_berry_quantity'']>> kg of berries for him today.</b>'
+	else
+		grandpaQW['chore_gather_both'] = 2
+		$stat_msg += '<br><b>You have picked the <<grandpaQW[''chore_mushroom_quantity'']>> kg of mushrooms and <<grandpaQW[''chore_berry_quantity'']>> kg of berries that Grandpa asked for - you should give them to him.</b>'
+	end
+end
+
+!! in case both grandparents gave you forest gathering chores
+if (boletus >= grandpaQW['chore_mushroom_quantity'] or boletus >= grandmaQW['chore_mushroom_quantity']) and (boletus < (grandpaQW['chore_mushroom_quantity'] + grandmaQW['chore_mushroom_quantity'])):
+	temp_boletus = (grandpaQW['chore_mushroom_quantity'] + grandmaQW['chore_mushroom_quantity']) - boletus
+	$stat_msg += '<br><b>You need <<temp_boletus>> more '+iif(temp_boletus = 1, 'kilo', 'kilos')+' of mushrooms to satisfy both of your grandparents'' requests.</b>'
+end
+if (bilberry >= grandpaQW['chore_berry_quantity'] or bilberry >= grandmaQW['chore_berry_quantity']) and (bilberry < (grandpaQW['chore_berry_quantity'] + grandmaQW['chore_berry_quantity'])):
+	temp_bilberry = (grandpaQW['chore_berry_quantity'] + grandmaQW['chore_berry_quantity']) - bilberry
+	$stat_msg += '<br><b>You need <<temp_bilberry>> more '+iif(temp_bilberry = 1, 'kilo', 'kilos')+' of berries to satisfy both of your grandparents'' requests.</b>'
+end
+
+
+!!------------------ Gadukino chores and such (End) -------------------
+
+if enable_extra_msg = 1:
+	if hour < meethour[0] and svidanie[0] = 1:
+		$stat_msg += '<BR><<$stat_bfgf_msg_0>>'
+	elseif hour = meethour[0] and svidanie[0] = 1:
+		$stat_msg += '<BR><b><font color="red"><<$stat_bfgf_msg_0>></font></b>'
+	end
+
+	if hour < meethour[1] and svidanie[1] = 1:
+		$stat_msg += '<BR><<$stat_bfgf_msg_1>>'
+	elseif hour = meethour[1] and svidanie[1] = 1:
+		$stat_msg += '<BR><b><font color="red"><<$stat_bfgf_msg_1>></font></b>'
+	end
+
+	if hour < meethour[2] and svidanie[2] = 1:
+		$stat_msg += '<BR><<$stat_bfgf_msg_2>>'
+	elseif hour = meethour[2] and svidanie[2] = 1:
+		$stat_msg += '<BR><b><font color="red"><<$stat_bfgf_msg_2>></font></b>'
+	end
+
+	if $stat_court_msg ! '': $stat_msg += '<BR><b><font color="red"><<$stat_court_msg>></font></b>'
+
+	if young_shop_work = 1 and hour = 16 and minut <= 5 and week < 6 and inWorkYoungShop = 0:
+		$stat_msg += 'You are late for work at Pussy-Cats.'
+	elseif young_shop_work = 1 and hour = 16 and week < 6 and inWorkYoungShop = 0:
+		if kats_absent_check ! daystart:
+			kats_absent_check = daystart
+			young_shop_miss += 1
+		end
+		$stat_msg += '<BR><b><font color="red">You missed work.</font></b>'
+	elseif young_shop_work = 1 and (hour = 14 or hour = 15) and week < 6:
+		$stat_msg += '<BR><b><font color="red">You start work at Pussy-Cats today at 16:00.</font></b>'
+	end
+
+	if young_shop_work1 = 1 and hour = 9 and minut <= 5 and week >= 6 and inWorkYoungShop = 0:
+		$stat_msg += 'You are late for work at Pussy-Cats.'
+	elseif young_shop_work1 = 1 and hour = 9 and week >= 6 and inWorkYoungShop = 0:
+		if kats_absent_check ! daystart:
+			kats_absent_check = daystart
+			young_shop_miss += 1
+		end
+		$stat_msg += '<BR><b><font color="red">You missed work.</font></b>'
+	elseif young_shop_work1 = 1 and (hour = 7 or hour = 8) and week >= 6:
+		$stat_msg += '<BR><b><font color="red">By 9:00, you have to be at Pussy-Cats to start work.</font></b>'
+	end
+
+	if young_shop_work2 = 1 and hour = 9 and minut <= 5 and week < 6 and inWorkYoungShop = 0:
+		$stat_msg += 'You are late for work at Pussy-Cats.'
+	elseif young_shop_work2 = 1 and hour = 9 and week < 6 and inWorkYoungShop = 0:
+		if kats_absent_check ! daystart:
+			kats_absent_check = daystart
+			young_shop_miss += 1
+		end
+		$stat_msg += '<BR><b><font color="red">You missed work.</font></b>'
+	elseif young_shop_work2 = 1 and (hour = 7 or hour = 8) and week < 6:
+		$stat_msg += '<BR><b><font color="red">By 9:00, you have to be at Pussy-Cats to start work.</font></b>'
+	end
+
+	if workrin = 1 and (week = 2 or week = 4 or week = 6) and hour > 5 and hour < 8:
+		$stat_msg += '<BR><b><font color="red">At 8 o''clock, you start work in the market.</font></b>'
+	elseif workrin = 1 and (week = 2 or week = 4 or week = 6) and hour = 8:
+		$stat_msg += '<BR><b><font color="red">You need to work in the market now.</font></b>'
+	end
+
+
+	if model['status'] > 0 and model_week = (daystart - week) / 7 and model_job_week >= 2:
+		$stat_msg += '<BR><b>You have no more modeling jobs available this week.</b>'
+	elseif model['status'] > 0 and model_week < (daystart - week) / 7 and model_job_week = 1:
+		$stat_msg += '<BR><b>You can get paid for 1 more modeling job this week.</b>'
+	elseif model['status'] > 0 and model_week < (daystart - week) / 7 and model_job_week < 1:
+		$stat_msg += '<BR><b>You can get paid for 2 modeling jobs this week.</b>'
+	end
+
+	if pornstack > 0 and pfilmday[0] = 0:
+		if pfilmday[1] = 0:
+			$stat_msg += '<br><b>You will star in another porno in <<porndays>> days.</b>'
+		else
+			$stat_msg += '<br><b>You have a porno shoot scheduled tomorrow.</b>'
+		end
+	end
+	if pfilmday[0] > 0:
+		if pornnow = 1:
+			$stat_msg += '<br><b>You are at a porn shooting.</b>'
+		else
+			if hour < 11: $stat_msg += '<br><b>You are expected in the porno studio at 10:00.</b>'
+			if hour >= 11 and hour < 13: $stat_msg += '<br><b>You should be at the porno studio, shooting!</b>'
+			if hour >= 13: $stat_msg += '<br><b>You missed a scheduled porno shoot!</b>'
+		end
+	end
+	if pornmiss = 1: $stat_msg += '<br><b>You missed a scheduled porno shoot!</b>'
+	if prodcosttrue > 0: $stat_msg += '<br><b>You owe money to the porn studio <<prodcost>>?</b>'
+	if firstkasting > 0 and pfilmNO < 1:
+		if pornstack <= 10:
+			$stat_msg += '<br>You are currently unable to book any more porn shoots at the Porn Studio.'
+		elseif pornstack = 11:
+			$stat_msg += '<br>You can contract <<10-pornstack>> porn shoot at the Porn Studio.'
+		else
+			$stat_msg += '<br>You can contract up to <<10-pornstack>> porn shoots at the Porn Studio.'
+		end
+	end
+
+	if masseuse['jobtype'] > 0:
+		if masseuse['<<week>>_shift_1'] = 1 and hour < 9:
+			$stat_msg +='<BR><b><font color="blue">You have a shift at the salon today at 9:00.</font></b>'
+		elseif masseuse['<<week>>_shift_1'] = 1 and hour < 9:
+			$stat_msg +='<BR><b><font color="red">You''re late for your 9:00 shift at the salon!</font></b>'
+		elseif masseuse['<<week>>_shift_2'] = 1 and hour < 13:
+			$stat_msg +='<BR><b><font color="blue">You have a shift at the salon today at 13:00.</font></b>'
+		elseif masseuse['<<week>>_shift_2'] = 1 and hour < 13:
+			$stat_msg +='<BR><b><font color="red">You''re late for your 13:00 shift at the salon!</font></b>'
+		elseif masseuse['<<week>>_shift_3'] and hour < 17:
+			$stat_msg +='<BR><b><font color="blue">You have a shift at the salon today at 17:00.</font></b>'
+		elseif masseuse['<<week>>_shift_3'] = 1 and hour < 17:
+			$stat_msg +='<BR><b><font color="red">You''re late for your 17:00 shift at the salon!</font></b>'
+		end
+	end
+
+
+!! Work at city cafe, workKafe['job'] is having the job and at_work is set when she is at work
+	if hour < 22 and week >= 2 and week <= 4 and workKafe['job'] = 1 and workKafe['at_work'] = 0:
+		if hour >= 12: $stat_msg += '<BR><b><font color="red">You missed your shift at The Roadhouse cafe today.</font></b>'
+		if hour < 12: $stat_msg += '<BR><b><font color="red">Today you have a shift at The Roadhouse cafe starting at 11:00.</font></b>'
+	end
+	if hour < 17 and week < 5 and workSec >= 1 or hour < 17 and week < 5 and workSec = 1:$stat_msg += '<BR><b><font color="red">Today you have a shift as a secretary at Titran-Express from 9:00 to 17:00</font></b>'
+	if hour < 17 and week < 5 and BurgerQW['Secretary'] = 1:$stat_msg += '<BR><b><font color="red">Today you have a shift as a secretary at Diner Bystroeshka from 9:00 to 17:00</font></b>'
+	if hour < 20 and week => 1 and week <= 5 and age < 18 and workFabrika = 1:$stat_msg += '<BR><b><font color = red>Today you have work in the garment factory in Pavlovsk. Shift starts at 16:00.</font></b>'
+	if hour < 16 and week => 1 and week <= 5 and age >= 18 and workFabrika = 1:$stat_msg += '<BR><b><font color = red>Today you have work in the garment factory in Pavlovsk. Shift starts at 8:00.</font></b>'
+	if hour < 16 and week > 1 and week <= 5 and workhosp = 1:$stat_msg += '<BR><b><font color="red">You work as a nurse in the city residential area clinic. Your shift starts at 8:00.</font></b>'
+	if hour < 10 and worksalon = 1 and (week = 1 or week = 3 or week = 5):$stat_msg += '<BR><b><font color = red>Today you have work as masseuse in the beauty salon. Shift starts at 9:00.</font></b>'
+	if leonidVisit = 1 and hour < 21 and hour > 6: $stat_msg += '<br><b>You have to serve Leonid at 20:00 in his Pavlovsk office!</b>'
+
+	if hypnoAddict > 0 and $stat_hypno_msg ! '' and hypnoWithdrawal = 1 and missCum >= timeTresh:
+		$stat_msg += '<BR><b><font color="red"><<$stat_hypno_msg>></font></b>'
+	elseif hypnoAddict > 0 and $stat_hypno_msg ! '' and hypnoWithdrawal = 1 and missCum < timeTresh:
+		$stat_msg += '<BR><b><font color="red"><<$stat_hypno_msg>></font></b>'
+	elseif hypnoAddict > 0 and $stat_hypno_msg ! '' and hypnoWithdrawal = 2 and missCum >= timeTresh:
+		$stat_msg += '<BR><b><font color="red"><<$stat_hypno_msg>></font></b>'
+	elseif hypnoAddict > 0 and $stat_hypno_msg ! '' and hypnoWithdrawal = 2 and missCum < timeTresh:
+		$stat_msg += '<BR><b><font color="red"><<$stat_hypno_msg>></font></b>'
+	elseif hypnoAddict > 0 and $stat_hypno_msg ! '':
+		$stat_msg += '<BR><b><font color="magenta"><<$stat_hypno_msg>></font></b>'
+	end
+end
+
+gs 'brother', 'brotherSexCount'
+
+!! List Current Active Spells
+if arrsize('spellComplete') > 0:
+	$tempSpellText="<br><b><font color='#FF99FF'>Active Spells</font></b>"
+	i=0
+	:ActiveSpellLoop
+	if i < arrsize('spellComplete'):
+		$tempSpellText += "<br><font color='#FF99FF'><<$spellName[$spellTimeName[i]]>></font>"
+		i += 1
+		jump 'ActiveSpellLoop'
+	end
+	$stat_msg += func('cleanHTML',$tempSpellText)
+	killvar '$tempSpellText'
+	killvar 'i'
+end
+
+!!Guitar icon goes here
+if ml_guitar['carried'] = 2 or $ml_guitar['location'] = 'testlab':
+	$stat_msg +='<br><br><a href="exec: gt ''music_actions'', ''start'', $curloc"><img src="images/system/icons/icon_guitar.png"></a>'
+end
+!!
+
+!!zero checks marriage
+proverka1 = 0
+proverka2 = 0
+proverka3 = 0
+proverka4 = 0
+proverka5 = 0
+
+if disable_LoadSave = 0:
+	$stat_msg += '<br><br><a href="exec:savegame ''quicksave.sav'' && pl''Quicksave Done''"><img src="images/system/icons/stat_qsave.png"></a>  <a href="exec:savegame"><img src="images/system/icons/stat_save.png"></a>  <a href="exec:opengame"><img src="images/system/icons/stat_load.png"></a>  <a href="exec:if input(''Input Anything to confirm Quick Load'') ! null: opengame ''quicksave.sav''"><img src="images/system/icons/stat_qload.png"></a>'
+elseif disable_LoadSave = 2:
+	$stat_msg += '<br><br><a href="exec:savegame ''quicksave.sav'' && pl''Quicksave Done''">Quick Save</a>  <a href="exec:savegame">Save</a>  <a href="exec:opengame">Load</a>  <a href="exec:if input(''Input Anything to confirm Quick Load'') ! null: opengame ''quicksave.sav''">Quick Load</a>'
+end
+
+if PillToggle = 1 and tabletki > 0:
+	Stabletki += tabletki
+	tabletki = 0
+elseif PillToggle = 0 and Stabletki > 0:
+	tabletki += Stabletki
+	Stabletki = 0
+end
+
+if CondomToggle = 1 and prezik > 0:
+	Sprezik += prezik
+	prezik = 0
+elseif CondomToggle = 0 and Sprezik > 0:
+	prezik += Sprezik
+	Sprezik = 0
+end
+
+$stat_android +=  ' <a href="exec:savegame ''quicksave.sav'' && pl''Quicksave Done''">Q.S</a>  <a href="exec:if input(''Input Anything to confirm Quick Load'') ! null: opengame ''quicksave.sav''">Q.L</a>'
+
+if Enable_statimg_loc = 2: $stat_msg += '<br><<$stat_imgtool_msg>><br><<$stat_imgextra_msg>>'
+
+killvar 'stat_imgtool_msg'
+killvar 'stat_imgextra_msg'
+
+if Enable_statfsize > 0: $stat_msg += '</font>' & !disable this, all texts comes from pl will have the same font size, like[time]
+if Enable_faceturn = 1:	view FUNC('$face_image')
+if Enable_Android = 0:
+	pl '<<$stat_msg>>'
+else
+	'<<$stat_android>>'
+	$stat_msg = 'Android mode, <a href="exec:gs ''$menu_obnovit''">Refresh</a><<$stat_msg>>'
+end
+!!end of bimbo withdrawal
+
+if bimbowithdrawal > 14:
+	bimbowithdrawal = 0
+	bimbo = 0
+	bimbolevel = 0
+	msg 'You suddenly feel as if your head is clear, instead of filled with pink thoughts.'
+end

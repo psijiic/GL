@@ -1,0 +1,264 @@
+! $ARGS[0]
+! ARGS[1] ... percentage
+! ARGS[2] ... real value
+! ARGS[3] ... text for type 3 bar
+
+ap = ARGS[1]
+ar = ARGS[2]
+if ap > 100:ap = 100
+if ap < 0:ap = 0
+$apc = ap
+$apg = 100-ap
+if Enable_Android = 1:
+	$vbcolor = 'gray'
+else
+	$vbcolor = '#d0d0d0'
+end
+
+$vfcolor='rgb(<<(16777216 + bcolor) mod 256>>,<<(16777216 + bcolor)/256 mod 256>>,<<(16777216 + bcolor)/65536>>)'
+
+if $ARGS[0] = '1':
+	if Enable_Android = 1:
+		if ap  >= 65:
+			$vcolor = 'green'
+		elseif ap >= 35:
+			$vcolor = 'blue'
+		else
+			$vcolor = 'red'
+		end
+	else
+		if ap >= 85:
+			$vcolor = 'green'
+		elseif ap >= 70:
+			$vcolor = '#b3b300'
+		elseif ap >= 50:
+			$vcolor = '#00CED1'
+		elseif ap >= 20:
+			$vcolor = 'blue'
+		elseif ap >= 10:
+			$vcolor = '#ff6600'
+		else
+			$vcolor = 'red'
+		end
+	end
+	if ap = 0: $vcolor = $vbcolor
+	if ap = 100: $vbcolor = $vcolor
+	$result = '<TABLE  cellpadding="0" cellspacing="0" width="220"><TR><TD bgcolor="<<$vcolor>>" width="<<$apc>>%"></TD><TD bgcolor="<<$vbcolor>>" width="<<$apg>>%"></TD><TD width="40" align="right"><<ar>></TD></TR></TABLE>'
+end
+
+if $ARGS[0] = '2':
+	if Enable_Android = 1:
+		if ap  >= 85:
+			$vcolor = 'red'
+		elseif ap >= 65:
+			$vcolor = 'orange'
+		elseif ap >= 45:
+			$vcolor = 'yellow>'
+		elseif ap >= 25:
+			$vcolor = 'green'
+		else
+			$vcolor = 'blue'
+		end
+	else
+		if ap >= 90:
+			$vcolor = '#ff0000'
+		elseif ap >= 80:
+			$vcolor = '#ff1a1a'
+		elseif ap >= 70:
+			$vcolor = '#ff3333'
+		elseif ap >= 60:
+			$vcolor = '#ff4d4d'
+		elseif ap >= 50:
+			$vcolor = '#ff6666'
+		elseif ap >= 40:
+			$vcolor = '#ff8080'
+		elseif ap >= 30:
+			$vcolor = '#e68080'
+		elseif ap >= 20:
+			$vcolor = '#cc8080'
+		elseif ap >= 10:
+			$vcolor = '#b38080'
+		else
+			$vcolor = '#998080'
+		end
+	end
+	if ap = 0: $vcolor = $vbcolor
+	if ap = 100: $vbcolor = $vcolor
+	$result = '<font color="<<$vfcolor>>"><TABLE  cellpadding="0" cellspacing="0" width="220"><TR><TD bgcolor="<<$vcolor>>" width="<<$apc>>%"></TD><TD bgcolor="<<$vbcolor>>" width="<<$apg>>%"></TD><TD width="40" align="right"><<ar>></TD></TR></TABLE></font>'
+end
+if $ARGS[0] = '3':
+	ap = ar
+	if Enable_Android = 1:
+		if ap  >= 130:
+			$vcolor = 'green'
+		elseif ap >= 70:
+			$vcolor = 'blue'
+		else
+			$vcolor = 'red'
+		end
+	else
+		if ap < 20:
+			$vcolor = '#b3b300'
+		elseif ap < 60:
+			$vcolor = '#00CED1'
+		elseif ap <= 140:
+			$vcolor = 'blue'
+		elseif ap <= 180:
+			$vcolor = '#00CED1'
+		else
+			$vcolor = '#b3b300'
+		end
+	end
+	if ap < 100:
+		ap = (100-ap)/2
+		apg = 50 - ap
+		$result = '<TABLE  cellpadding="0" cellspacing="0" width="220"><TR><TD bgcolor="<<$vbcolor>>" width="<<apg>>%"></TD><TD bgcolor="<<$vcolor>>" width="<<ap>>%"></TD><TD bgcolor="<<$vbcolor>>" width="50%"><<$ARGS[3]>></TD><TD width="40" align="right">-<<100-ar>></TD></TR></TABLE>'
+	else
+		ap = (ap - 100)/2
+		apg = 50 - ap
+		$result = '<TABLE  cellpadding="0" cellspacing="0" width="220"><TR><TD bgcolor="<<$vbcolor>>" width="50%"><<$ARGS[3]>></TD><TD bgcolor="<<$vcolor>>" width="<<ap>>%"></TD><TD bgcolor="<<$vbcolor>>" width="<<apg>>%"></TD><TD width="40" align="right"><<ar-100>></TD></TR></TABLE>'
+	end
+end
+
+! once time initialization
+if $pcs_reverse_formula['musicprod'] = '':
+	! made from direct formulas declared in module "stat_sklattrib_lvlset"
+	$pcs_reverse_formula['jab'] 		= 'ARGS[0] * 2 - (pcs_agil * 2 + pcs_stren) / 3'
+	$pcs_reverse_formula['punch'] 		= 'ARGS[0] * 2 - (pcs_stren * 2 + pcs_agil) / 3'
+	$pcs_reverse_formula['kick'] 		= 'ARGS[0] * 2 - (pcs_stren * 3 + pcs_agil) / 4'
+	$pcs_reverse_formula['def'] 		= 'ARGS[0] * 2 - (pcs_agil + pcs_stren + pcs_react) / 3'
+	$pcs_reverse_formula['shoot'] 		= 'ARGS[0] * 2 - (pcs_agil + pcs_react) / 2'
+	$pcs_reverse_formula['bushcraft'] 	= 'ARGS[0] * 2 - (pcs_agil + pcs_stren + pcs_intel) / 3'
+	$pcs_reverse_formula['vokal'] 		= 'ARGS[0] * 2 - (pcs_intel + pcs_chrsm) / 2'
+	$pcs_reverse_formula['sewng'] 		= 'ARGS[0] * 2 - (pcs_agil + pcs_intel) / 2'
+	$pcs_reverse_formula['instrmusic'] 	= 'ARGS[0] * 2 - (2 * pcs_agil + pcs_intel) / 3'
+	$pcs_reverse_formula['photoskl'] 	= 'ARGS[0] * 2 - (2 * pcs_intel + pcs_react) / 3'
+	$pcs_reverse_formula['artskls'] 	= 'ARGS[0] * 2 - (pcs_intel + pcs_react + pcs_agil) / 3'
+	$pcs_reverse_formula['danc'] 		= 'ARGS[0] * 2 - (pcs_agil + pcs_react + pcs_vital) / 3'
+	$pcs_reverse_formula['dancero'] 	= '(ARGS[0] - (3 * flxibt)) * 2 - (pcs_agil + pcs_chrsm + pcs_vital) / 3'
+	$pcs_reverse_formula['dancpol'] 	= '(ARGS[0] - (3 * flxibt)) * 2 - (pcs_agil + pcs_stren + pcs_chrsm) / 3'
+	$pcs_reverse_formula['chess'] 		= '(ARGS[0] - (5 * logictrt)) * 2 -  pcs_intel'
+	$pcs_reverse_formula['gaming'] 		= 'ARGS[0] * 2 - (2 * pcs_intel + pcs_react) / 3'
+	$pcs_reverse_formula['humint'] 		= '(ARGS[0] - (5 * chrmng) + (5 * meantrt)) * 2 - (pcs_prcptn + pcs_chrsm + pcs_react)/3'
+	$pcs_reverse_formula['persuas'] 	= '(ARGS[0] - (5 * chrmng) + (5 * meantrt)) * 2 - (pcs_prcptn + pcs_chrsm) / 2'
+	$pcs_reverse_formula['run'] 		= 'ARGS[0] * 2 - (2 * (pcs_agil + pcs_stren) + pcs_vital) / 5'
+	$pcs_reverse_formula['vball'] 		= 'ARGS[0] * 2 - (2 * pcs_agil + pcs_react + pcs_stren + pcs_vital) / 5'
+	$pcs_reverse_formula['icesktng'] 	= 'ARGS[0] * 2 - (2 * pcs_agil + pcs_stren) / 3'
+	$pcs_reverse_formula['wrstlng'] 	= 'ARGS[0] * 2 - (2 * pcs_stren + pcs_vital + pcs_agil) / 4'
+	$pcs_reverse_formula['ftbll']		= 'ARGS[0] * 2 - (pcs_vital + pcs_agil + pcs_stren) / 3'
+	$pcs_reverse_formula['bkbll'] 		= 'ARGS[0] * 2 - (pcs_vital + pcs_agil + pcs_react) / 3'
+	$pcs_reverse_formula['splcstng'] 	= 'ARGS[0] * 2 - (pcs_intel + pcs_react) / 2'
+	$pcs_reverse_formula['observ'] 		= 'ARGS[0] * 2 - (pcs_prcptn + pcs_react + pcs_intel)/3'
+	$pcs_reverse_formula['makupskl'] 	= 'ARGS[0] * 2 -  (pcs_intel + pcs_agil) / 2'
+	$pcs_reverse_formula['compskl'] 	= '(ARGS[0] - (5 * logictrt)) * 2 - pcs_intel'
+	$pcs_reverse_formula['comphckng'] 	= '(ARGS[0] - (5 * logictrt)) * 2 - (pcs_intel + pcs_react) / 2'
+	$pcs_reverse_formula['hndiwrk'] 	= 'ARGS[0] * 2 - (2 * pcs_agil + pcs_intel) / 3'
+	$pcs_reverse_formula['servng'] 		= 'ARGS[0] * 2 - (pcs_intel + pcs_vital) / 2'
+	$pcs_reverse_formula['cleaning'] 	= 'ARGS[0] * 2 - (pcs_intel + pcs_vital) / 2'
+	$pcs_reverse_formula['mdlng'] 		= '(ARGS[0] * 2 - (pcs_agil + pcs_vital) / 4) * 2 / 3'
+	$pcs_reverse_formula['medcn'] 		= 'ARGS[0] * 2 - (pcs_intel + pcs_react + pcs_prcptn) / 3'
+	$pcs_reverse_formula['heels'] 		= 'ARGS[0]'
+	$pcs_reverse_formula['pool'] 		= '(ARGS[0] * 4 - pcs_intel) / 3'
+	$pcs_reverse_formula['inhib'] 		= 'ARGS[0]  - (alko * 3)'
+	$pcs_reverse_formula['perform'] 	= 'ARGS[0] * 2 - (pcs_chrsm + pcs_prcptn) / 2'
+	$pcs_reverse_formula['cheer'] 		= 'ARGS[0] * 2 - (pcs_agil + pcs_react + pcs_vital) / 3'
+	$pcs_reverse_formula['musicprod'] 	= 'ARGS[0] * 2 - (pcs_intel + pcs_prcptn + pcs_sprt) / 3'
+end
+
+
+if $ARGS[0] = '4':
+
+	if Enable_Android = 1:
+		$vbcolor = 'gray'
+	else
+		$vbcolor = '#d0d0d0'
+	end
+	
+	if Enable_Android = 1:
+		if ap  >= 65:
+			$vcolor = 'green'
+		elseif ap >= 35:
+			$vcolor = 'blue'
+		else
+			$vcolor = 'red'
+		end
+	else
+		if ap >= 85:
+			$vcolor = 'green'
+		elseif ap >= 70:
+			$vcolor = '#b3b300'
+		elseif ap >= 50:
+			$vcolor = '#00CED1'
+		elseif ap >= 20:
+			$vcolor = 'blue'
+		elseif ap >= 10:
+			$vcolor = '#ff6600'
+		else
+			$vcolor = 'red'
+		end
+	end
+	if ap = 0: $vcolor = $vbcolor
+	if ap = 100: $vbcolor = $vcolor
+	
+	if $param_xp_table_bar_color <> '': $vcolor = $skill_xp_table_bar_color
+
+	dynamic 'idt_lvl = <<$ARGS[3]>>_lvl'
+	dynamic 'idt_xp = <<$ARGS[3]>>_exp'
+	dynamic 'idt_pcs = pcs_<<$ARGS[3]>>'
+	
+	if $pcs_reverse_formula[$ARGS[3]] <> '':
+		idt_lvl_0 = dyneval( 'result = <<$pcs_reverse_formula[$ARGS[3]]>>', idt_pcs )
+		idt_lvl_1 = dyneval( 'result = <<$pcs_reverse_formula[$ARGS[3]]>>', idt_pcs+1 )
+	else
+		idt_lvl_0 = idt_pcs
+		idt_lvl_1 = idt_pcs+1
+	end
+	
+	idt_nxtlvl_xp = (expadj * (idt_lvl_1-1) * (idt_lvl_1-1) / 180)
+	idt_curlvl_xp = (expadj * (idt_lvl_0-1) * (idt_lvl_0-1) / 180)
+	idt_delta_xp = idt_nxtlvl_xp - idt_curlvl_xp
+	if idt_delta_xp > 0:
+		idt_xp_procent = ( idt_xp - idt_curlvl_xp ) * 100 / idt_delta_xp
+		if idt_xp_procent > 100: idt_xp_procent = 100
+		idt_xp_procent_100 = 100 - idt_xp_procent
+	else
+		idt_xp_procent     = 0
+		idt_xp_procent_100 = 100
+	end	
+	
+	$result = ''
+	
+	!$result += '<<$ARGS[3]>> idt_pcs=<<idt_pcs>> idt_lvl=<<idt_lvl>> idt_xp=<<idt_xp>> idt_lvl_0=<<idt_lvl_0>> idt_lvl_1=<<idt_lvl_1>><br>'
+	
+	
+	if param_xp_table_col = 0: $result += '<tr>'
+	$result += '<td width="<<param_xp_table_col_width>>"><table cellpadding="0" cellspacing="0" border=0 width="100%">'
+	if param_xp_table_num_color_is_dynamic = 0:
+		$result += '	<tr><td nowrap><<ar>> <<$ARGS[4]>></td></tr>'
+	else
+		$result += '	<tr><td nowrap><font color="<<$vcolor>>"><<ar>></font> <<$ARGS[4]>></td></tr>'
+	end
+	!if (idt_xp_procent + idt_xp_procent_100) = 100:
+		$result += '	<tr><td>'
+		$result += '		<table  cellpadding="0" cellspacing="0" border=0 width="100%"><tr>'
+		!$result += '			<td width="<<exp_procent>>%" height="<<param_xp_table_bar_height>>" bgcolor="#008800"></td>'
+		!$result += '			<td width="<<exp_procent_100>>%" height="<<param_xp_table_bar_height>>" bgcolor="#CCCCCC"></td>'
+		$result += '			<td width="<<idt_xp_procent>>%" height="<<param_xp_table_bar_height>>" bgcolor="<<$vcolor>>"></td>'
+		$result += '			<td width="<<idt_xp_procent_100>>%" height="<<param_xp_table_bar_height>>" bgcolor="<<$vbcolor>>"></td>'
+		$result += '		</tr></table>'
+		$result += '	</td></tr>'
+	!end
+	$result += '</table></td>'	
+	param_xp_table_col += 1
+	if param_xp_table_col >= param_xp_table_col_cnt:
+		$result += '</tr>'
+		param_xp_table_col = 0
+	end
+end
+
+killvar 'ap'
+killvar 'ar'
+killvar '$apg'
+killvar '$apc'
+killvar '$vcolor'
+killvar '$vfcolor'
