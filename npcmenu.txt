@@ -25,7 +25,7 @@
 !{
 	gs 'show_table', '<a href="exec:gs ''npcmenu''">...</a>','2'
 	
-	if npcme_tracked_npcs_cnt > 0:
+	if npcme_tracked_npcs_cnt > 0 or npcme_tracked_dynpcs_cnt > 0:
 		gs 'npcmenu', 'update_table'
 		$show_table = $npc_table_stat
 	else
@@ -46,26 +46,23 @@ if $ARGS[0] = '':
 	
 	! store global variables which used in this module as local variables
 	npcme_stored_colnum  = colnum
-	!npcme_stored_colcnt  = colcnt
 	npcme_stored_grpnum  = grpnum
 	npcme_stored_npc_num = npc_num
-	npcme_stored_npc_cnt = npc_cnt
 	
 	! clear npc search filter
 	$npcme_filter_name = ''
 	
-	!npc_cnt = arrsize('npc_firstname')
-	npc_cnt = aarraynumber
+	!npcme_npc_cnt = arrsize('npc_firstname')
+	npcme_npc_cnt = aarraynumber
 	
-	!npcme_initialized = 0
 	!last file version number
 	!increase it by one if u want to reinitizlize file variables
-	npcme_file_version = 7
+	npcme_file_version = 9
 
 	! [re]initialization
 	!if npcme_initialized = 0:
 	if npcme_fver < npcme_file_version:
-		npcme_fver = npcme_file_version
+		!npcme_fver = npcme_file_version
 		! <definitions below should be in special file?>
 		! enum GROUPS
 		grpnum = 0
@@ -114,8 +111,6 @@ if $ARGS[0] = '':
 !'#006B3C'
 		$npcme_group_color_default[GRP_FRIENDS]  = '#007FFF'
 
-		!if npcme_group_color_default_initialized_once = 0:
-		!	npcme_group_color_default_initialized_once = 1
 		$npcme_group_color[GRP_OTHERS]   = $npcme_group_color_default[GRP_OTHERS]
 		$npcme_group_color[GRP_COOLKIDS] = $npcme_group_color_default[GRP_COOLKIDS]
 		$npcme_group_color[GRP_JOCKS]    = $npcme_group_color_default[GRP_JOCKS]
@@ -147,11 +142,6 @@ if $ARGS[0] = '':
 		$rel_name[REL_GOOD]       = 'Good'
 		$rel_name[REL_GREAT]      = 'Great'
 		!
-		!$rel_color[REL_COLD]       = 'red'
-		!$rel_color[REL_ACQUAINTED] = 'orange'
-		!$rel_color[REL_NORMAL]     = 'yellow'
-		!$rel_color[REL_GOOD]       = 'green'
-		!$rel_color[REL_GREAT]      = 'blue'
 		! define which types of relations will be shown by default
 		npcme_show_rel[REL_COLD]       = 1
 		npcme_show_rel[REL_ACQUAINTED] = 1
@@ -205,6 +195,11 @@ if $ARGS[0] = '':
 		$npcme_col_name[colnum] = 'Nickname'
 		npcme_col_show[colnum] = 1
 		colnum += 1
+		! CustomUsedname
+		npcme_COL_CUSTOMNAME = colnum
+		$npcme_col_name[colnum] = 'Name in list'
+		npcme_col_show[colnum] = 0
+		colnum += 1
 		! Relation
 		npcme_COL_RELATION = colnum
 		$npcme_col_name[colnum] = 'Relation'
@@ -248,7 +243,6 @@ if $ARGS[0] = '':
 		! Track
 		npcme_COL_TRACK = colnum
 		$npcme_col_name[colnum] = 'Track'
-		!$npcme_col_name_plus[colnum] = '<br>all none'
 		$npcme_col_name_plus[colnum] = '<br><a href="exec:gs ''npcmenu'',''track_all'' & gt ''npcmenu'',''start''">All</a>|<a href="exec:gs ''npcmenu'',''track_none'' & gt ''npcmenu'',''start''">None</a>'
 		npcme_col_show[colnum] = 1
 		colnum += 1
@@ -262,7 +256,7 @@ if $ARGS[0] = '':
 		npcme_column_count = colnum
 		
 		! TODO:
-		! +columns: Dick/Bust size, Sex times, Interests/Hobbies, Quests, Address (house generator?), Phone, Facebook
+		! +columns: Interests/Hobbies, Address (house generator?), Phone, Facebook
 		! Change relationship[0..100] to friendship[-100..100] and romance[-100..100]
 		
 		! tracked   - npc displayed in stats panel
@@ -270,10 +264,13 @@ if $ARGS[0] = '':
 		! untracked - npc not displayed in stats panel
 		npcme_show_untracked = 1
 		
-		! show people you don''t meet yet
-		npcme_show_unknown_npc = 0
+		! show people you don''t meet yet and some hidden parameters
+		npcme_cheat_reveal_all = 0
 		
 		if npc_table_stat_colcnt = 0: npc_table_stat_colcnt = 2
+		
+		! sort npcs by groups by default
+		if npcme_npcs_sorted_by = 0: npcme_npcs_sorted_by = npcme_COL_GROUPS
 		
 		npcme_initialized = 1
 	end
@@ -290,34 +287,30 @@ if $ARGS[0] = '':
 		
 	! create array of indexes of npcs sorted by group
 	! actually it should check npcstatic1..6 version parameter (? npcstatic_version = 1), but this parameter not exists yet (TODO:add)
-	if npcme_npcstatic_cnt < npc_cnt:
-		killvar 'npcme_npcs_sorted_by_groups'
-		npcme_npcs_sorted_by_groups_cnt = 0
-		gs 'npcmenu', 'add_npcs_sorted_by_groups', GRP_COOLKIDS
-		gs 'npcmenu', 'add_npcs_sorted_by_groups', GRP_JOCKS
-		gs 'npcmenu', 'add_npcs_sorted_by_groups', GRP_NERDS
-		gs 'npcmenu', 'add_npcs_sorted_by_groups', GRP_GOPNIKS
-		gs 'npcmenu', 'add_npcs_sorted_by_groups', GRP_OUTCASTS
-		gs 'npcmenu', 'add_npcs_sorted_by_groups', GRP_TEACHERS
-		gs 'npcmenu', 'add_npcs_sorted_by_groups', GRP_FAMILY
-		gs 'npcmenu', 'add_npcs_sorted_by_groups', GRP_FRIENDS
-		gs 'npcmenu', 'add_npcs_sorted_by_groups', GRP_OTHERS
+	if npcme_npcstatic_cnt < npcme_npc_cnt or npcme_fver < npcme_file_version:
+
+		if npcme_npcs_sorted_by = npcme_COL_GROUPS:
+			gs 'npcmenu', 'sort_npcs_by_group'
+		else
+			gs 'npcmenu', 'sort_npcs_by_baseid'
+		end
 		
-		npcme_npcstatic_cnt = npc_cnt
+		npcme_npcstatic_cnt = npcme_npc_cnt
 	end
+	
+	npcme_fver = npcme_file_version
+	
+	! restore global variables
+	colnum  = npcme_stored_colnum
+	grpnum  = npcme_stored_grpnum
+	npc_num = npcme_stored_npc_num
+	
 	
 	gs 'npcmenu', 'start'
 end
 !-------------------------------------------------------------------------------
 
-if $ARGS[0] = 'ex1t':
-	
-	! restore global variables
-	colnum  = npcme_stored_colnum
-	!colcnt  = npcme_stored_colcnt
-	grpnum  = npcme_stored_grpnum
-	npc_num = npcme_stored_npc_num
-	npc_cnt = npcme_stored_npc_cnt
+if $ARGS[0] = 'exit':
 	
 	npcme_exit = 0
 	
@@ -333,14 +326,16 @@ end
 if $ARGS[0] = 'start':
 
 	*clr & cla
+
+	! store global variables which used in this module as local variables
+	npcme_stored_colnum  = colnum
+	npcme_stored_grpnum  = grpnum
+	npcme_stored_npc_num = npc_num
 		
 	$npcme_table = ''
 	$npcme_text = ''
 	
 	! short npc table (name+relationship) for show in stats panel (used in module: stat_display)
-	!$npc_table_stat=''
-	!npc_table_stat_colcnt = 2
-	!npc_table_stat_colnum = 1
 	
 	killvar 'npcme_tracked_npcs'
 	npcme_tracked_npcs_cnt = 0
@@ -375,18 +370,14 @@ if $ARGS[0] = 'start':
 	grpnum += 1
 	if grpnum < groups_count: jump 'next_group'
 	
-	$npcme_text += '  <a href="exec:gs ''npcmenu'',''show_groups_all'' & gt ''npcmenu'',''start''">ALL</a> '
-	$npcme_text += '<a href="exec:gs ''npcmenu'',''show_groups_none'' & gt ''npcmenu'',''start''">NONE</a>'
-	$npcme_text += ']<br>'
-
+	$npcme_text += '  <a href="exec:gs ''npcmenu'',''show_groups_all'' & gt ''npcmenu'',''start''">ALL</a>'
+	$npcme_text += ']<br> '
 	
 	! show group colors
 	$npcme_text += '[Group colors: '
 	if npcme_show_group_colors = 0:
-		!$npcme_text += '<a href="exec:npcme_show_group_colors = 1 & gt ''npcmenu'',''start''"><font color="red">Show</font></a> '
 		$npcme_text += '<a href="exec:npcme_show_group_colors = 1 & gt ''npcmenu'',''start''">Show</a> '
 	else
-		!$npcme_text += '<a href="exec:npcme_show_group_colors = 0 & gt ''npcmenu'',''start''"><font color="green">Show</font></a> '
 		$npcme_text += '<a href="exec:npcme_show_group_colors = 0 & gt ''npcmenu'',''start''">Hide</a> '
 
 		grpnum = 0
@@ -405,8 +396,6 @@ if $ARGS[0] = 'start':
 	end
 	$npcme_text += ']'
 
-	!$npcme_text += ' [Npcs per row=<a href="exec:npc_table_stat_colcnt=input(''Enter column count'')  & gt ''npcmenu'',''start''"><<npc_table_stat_colcnt>></a>]'
-	
 	$npcme_text += '<br>'
 	
 	! show relations filter
@@ -421,8 +410,8 @@ if $ARGS[0] = 'start':
 	npcme_relnum += 1
 	if npcme_relnum < REL_CNT: jump 'next_rel'
 	!
-	$npcme_text += '  <a href="exec:gs ''npcmenu'',''show_rels_all'' & gt ''npcmenu'',''start''">ALL</a> '
-	$npcme_text += '<a href="exec:gs ''npcmenu'',''show_rels_none'' & gt ''npcmenu'',''start''">NONE</a>'
+	$npcme_text += '  <a href="exec:gs ''npcmenu'',''show_rels_all'' & gt ''npcmenu'',''start''">ALL</a>'
+	!$npcme_text += '<a href="exec:gs ''npcmenu'',''show_rels_none'' & gt ''npcmenu'',''start''">NONE</a>'
 	$npcme_text += ']'
 
 	
@@ -431,40 +420,54 @@ if $ARGS[0] = 'start':
 	npcme_gennum = 0
 	:next_gen
 	if npcme_show_gender[npcme_gennum] = 1:
-		$npcme_text += ' <a href="exec:npcme_show_gender[<<npcme_gennum>>]=0 & gt ''npcmenu'',''start''"><font color="green"><<$gender_name[npcme_gennum]>></font></a>'
+		$npcme_text += ' <a href="exec:gs ''npcmenu'',''show_genders_none'' & npcme_show_gender[<<npcme_gennum>>]=1 & gt ''npcmenu'',''start''"><font color="green"><<$gender_name[npcme_gennum]>></font></a>'
 	else
-		$npcme_text += ' <a href="exec:npcme_show_gender[<<npcme_gennum>>]=1 & gt ''npcmenu'',''start''"><font color="red"><<$gender_name[npcme_gennum]>></font></a>'
+		$npcme_text += ' <a href="exec:gs ''npcmenu'',''show_genders_none'' & npcme_show_gender[<<npcme_gennum>>]=1 & gt ''npcmenu'',''start''"><font color="red"><<$gender_name[npcme_gennum]>></font></a>'
 	end
 	npcme_gennum += 1
 	if npcme_gennum < GENDER_CNT: jump 'next_gen'
+	!
+	$npcme_text += '  <a href="exec:gs ''npcmenu'',''show_genders_all'' & gt ''npcmenu'',''start''">ALL</a>'
+	!$npcme_text += '<a href="exec:gs ''npcmenu'',''show_genders_none'' & gt ''npcmenu'',''start''">NONE</a>'
 	$npcme_text += ']'
 
 
 	! Show 'Tracked Untracked' filter
 	$npcme_text += '  [Show: '
 	if npcme_show_tracked = 1:
-		$npcme_text += '<a href="exec:npcme_show_tracked=0 & gt ''npcmenu'',''start''"><font color="green">Tracked</font></a>'
+		$npcme_text += '<a href="exec:npcme_show_tracked=1 & npcme_show_untracked=0 & gt ''npcmenu'',''start''"><font color="green">Tracked</font></a>'
 	else
-		$npcme_text += '<a href="exec:npcme_show_tracked=1 & gt ''npcmenu'',''start''"><font color="red">Tracked</font></a>'
+		$npcme_text += '<a href="exec:npcme_show_tracked=1 & npcme_show_untracked=0 & gt ''npcmenu'',''start''"><font color="red">Tracked</font></a>'
 	end
 	if npcme_show_untracked = 1:
-		$npcme_text += ' <a href="exec:npcme_show_untracked=0 & gt ''npcmenu'',''start''"><font color="green">Untracked</font></a>'
+		$npcme_text += ' <a href="exec:npcme_show_untracked=1 & npcme_show_tracked=0 & gt ''npcmenu'',''start''"><font color="green">Untracked</font></a>'
 	else
-		$npcme_text += ' <a href="exec:npcme_show_untracked=1 & gt ''npcmenu'',''start''"><font color="red">Untracked</font></a>'
+		$npcme_text += ' <a href="exec:npcme_show_untracked=1 & npcme_show_tracked=0 & gt ''npcmenu'',''start''"><font color="red">Untracked</font></a>'
 	end
+	$npcme_text += '  <a href="exec:npcme_show_tracked=1 & npcme_show_untracked=1 & gt ''npcmenu'',''start''">ALL</a>'
 	$npcme_text += '] '
-	!$npcme_text += '<br>'
 
 	$npcme_text += ' [Npcs per row=<a href="exec:npc_table_stat_colcnt=input(''Enter column count'')  & gt ''npcmenu'',''start''"><<npc_table_stat_colcnt>></a>]'
 	
-	if npcme_show_unknown_npc = 1:
-		$npcme_text += '  [Cheat: <a href="exec:npcme_show_unknown_npc=0 & gt ''npcmenu'',''start''"><font color="green">Show unknown people</font></a>]<br>'
+	if npcme_cheat_reveal_all = 1:
+		$npcme_text += '  [Cheat: <a href="exec:npcme_cheat_reveal_all=0 & gt ''npcmenu'',''start''"><font color="green">Reveal all</font></a>]<br>'
 	else
-		$npcme_text += '  [Cheat: <a href="exec:npcme_show_unknown_npc=1 & gt ''npcmenu'',''start''"><font color="red">Show unknown people</font></a>]<br>'
+		$npcme_text += '  [Cheat: <a href="exec:npcme_cheat_reveal_all=1 & gt ''npcmenu'',''start''"><font color="red">Reveal all</font></a>]<br>'
 	end
 
 	$npcme_text += '[<a href="exec:$npcme_filter_name=input(''Enter name/lastname/nickname to find'') & gt ''npcmenu'',''start''"><font color="green">Find by Name/Lastname/Nickname:</font></a> ''<<$npcme_filter_name>>'''
-	$npcme_text += ' <a href="exec:$npcme_filter_name='''' & gt ''npcmenu'',''start''">Clear</a>]<br>'
+	$npcme_text += ' <a href="exec:$npcme_filter_name='''' & gt ''npcmenu'',''start''">Clear</a>]  '
+	
+	$npcme_text += '[Sort by: '
+	if npcme_npcs_sorted_by = npcme_COL_GROUPS:
+		$npcme_text += '<a href="exec:npcme_npcs_sorted_by = <<npcme_COL_GROUPS>> & gs ''npcmenu'',''sort_npcs_by_group'' & gt ''npcmenu'',''start''"><font color="green">Groups</font></a> '
+		$npcme_text += '<a href="exec:npcme_npcs_sorted_by = <<npcme_COL_BASEID>> & gs ''npcmenu'',''sort_npcs_by_baseid'' & gt ''npcmenu'',''start''"><font color="red">BaseID</font></a>'
+	else
+		$npcme_text += '<a href="exec:npcme_npcs_sorted_by = <<npcme_COL_GROUPS>> & gs ''npcmenu'',''sort_npcs_by_group'' & gt ''npcmenu'',''start''"><font color="red">Groups</font></a> '
+		$npcme_text += '<a href="exec:npcme_npcs_sorted_by = <<npcme_COL_BASEID>> & gs ''npcmenu'',''sort_npcs_by_baseid'' & gt ''npcmenu'',''start''"><font color="green">BaseID</font></a>'
+	end
+	$npcme_text += ']<br>'
+
 	
 	! presets
 	npcme_preset_num = 0
@@ -477,12 +480,7 @@ if $ARGS[0] = 'start':
 	npcme_preset_num += 1
 	if npcme_preset_num < npcme_preset_cnt: jump 'next_preset'
 	$npcme_text += '</TR></TABLE>'
-	!
-	!$npcme_text += '<<$npcme_preset2_name>>:'
-	!$npcme_text += '<a href="exec:gs ''npcmenu'',''save_preset'',2 &  & gt ''npcmenu'',''start''">Save</a>|'
-	!$npcme_text += '<a href="exec:gs ''npcmenu'',''load_preset'',2 & npcme_exit = 1 & gt ''npcmenu'',''start''">Load</a>|'
-	!$npcme_text += '<a href="exec:$npcme_preset2_name=input(''Enter preset name:'') & gt ''npcmenu'',''start''">Rename</a> '
-	!$npcme_text += ']<br>'
+
 
 	! Show text before table
 	'<<$npcme_text>>'
@@ -499,13 +497,9 @@ if $ARGS[0] = 'start':
 	killvar 'npcm_in_table'
 	
 	gs 'npcmenu', 'update_dynpc_table'
-
 	
-	npc_total_cnt = npc_cnt + dynpc_cnt
+	npc_total_cnt = npcme_npc_cnt + dynpc_cnt
 	
-	
-	!killvar '$npc_tracked'
-
 	
 	! <FILL NPCS TABLE>
 	$npcme_l_filter_name = LCASE($npcme_filter_name)
@@ -514,21 +508,23 @@ if $ARGS[0] = 'start':
 	npcme_index = 1
 	:next_npc
 	
-	if npc_num_1 <= npc_cnt:
-		npc_num = npcme_npcs_sorted_by_groups[npc_num_1]
+	if npc_num_1 <= npcme_npc_cnt:
+		npc_num = npcme_npcs_sorted[npc_num_1]
 	
-		npcme_npc_group      = npc_grupTipe['A<<npc_num>>']
-		npcme_npc_rel        = npc_rel['A<<npc_num>>']
-		npcme_npc_QW         = npc_QW['A<<npc_num>>']
-		npcme_npc_gender     = npc_gender['A<<npc_num>>']
-		npcme_npc_tracked    = npc_tracked['A<<npc_num>>']
-		$npcme_npc_firstname = $npc_firstname['A<<npc_num>>']
-		$npcme_npc_lastname  = $npc_lastname['A<<npc_num>>']
-		$npcme_npc_nickname  = $npc_nickname['A<<npc_num>>']
-		npcme_npc_dob        = npc_dob['A<<npc_num>>']
-		npcme_npc_sex        = npc_sex['A<<npc_num>>']
-		npcme_npc_dick       = npc_dick['A<<npc_num>>']
-		npcme_npc_bust       = npc_bust['A<<npc_num>>']
+		npcme_npc_group       = npc_grupTipe['A<<npc_num>>']
+		npcme_npc_rel         = npc_rel['A<<npc_num>>']
+		npcme_npc_QW          = npc_QW['A<<npc_num>>']
+		npcme_npc_gender      = npc_gender['A<<npc_num>>']
+		npcme_npc_tracked     = npc_tracked['A<<npc_num>>']
+		$npcme_npc_firstname  = $npc_firstname['A<<npc_num>>']
+		$npcme_npc_lastname   = $npc_lastname['A<<npc_num>>']
+		$npcme_npc_nickname   = $npc_nickname['A<<npc_num>>']
+		$npcme_npc_usedname   = $npc_usedname['A<<npc_num>>']
+		$npcme_npc_customname = $npc_customname['A<<npc_num>>']
+		npcme_npc_dob         = npc_dob['A<<npc_num>>']
+		npcme_npc_sex         = npc_sex['A<<npc_num>>']
+		npcme_npc_dick        = npc_dick['A<<npc_num>>']
+		npcme_npc_bust        = npc_bust['A<<npc_num>>']
 		
 		if npcme_npc_rel = 0: npcme_npc_rel = npc_rel_TMP['A<<npc_num>>']
 		
@@ -539,26 +535,25 @@ if $ARGS[0] = 'start':
 	else
 		npc_num = npc_num_1
 	
-		dynpc_num = npc_num - npc_cnt - 1
-		npcme_npc_group      = dynpc_grupTipe[dynpc_num]
-		npcme_npc_rel        = dynpc_rel[dynpc_num]
-		npcme_npc_QW         = dynpc_QW[dynpc_num]
-		npcme_npc_gender     = dynpc_gender[dynpc_num]
-		npcme_npc_tracked    = dynpc_tracked[dynpc_num]
-		$npcme_npc_firstname = $dynpc_firstname[dynpc_num]
-		$npcme_npc_lastname  = $dynpc_lastname[dynpc_num]
-		$npcme_npc_nickname  = $dynpc_nickname[dynpc_num]
-		npcme_npc_dob        = dynpc_dob[dynpc_num]
-		npcme_npc_sex        = dynpc_sex[dynpc_num]
-		npcme_npc_dick       = dynpc_dick[dynpc_num]
-		npcme_npc_bust       = dynpc_bust[dynpc_num]
+		dynpc_num = npc_num - npcme_npc_cnt - 1
+		npcme_npc_group       = dynpc_grupTipe[dynpc_num]
+		npcme_npc_rel         = dynpc_rel[dynpc_num]
+		npcme_npc_QW          = dynpc_QW[dynpc_num]
+		npcme_npc_gender      = dynpc_gender[dynpc_num]
+		npcme_npc_tracked     = dynpc_tracked[dynpc_num]
+		$npcme_npc_firstname  = $dynpc_firstname[dynpc_num]
+		$npcme_npc_lastname   = $dynpc_lastname[dynpc_num]
+		$npcme_npc_nickname   = $dynpc_nickname[dynpc_num]
+		$npcme_npc_usedname   = $dynpc_usedname[dynpc_num]
+		$npcme_npc_customname = $dynpc_customname[dynpc_num]
+		npcme_npc_dob         = dynpc_dob[dynpc_num]
+		npcme_npc_sex         = dynpc_sex[dynpc_num]
+		npcme_npc_dick        = dynpc_dick[dynpc_num]
+		npcme_npc_bust        = dynpc_bust[dynpc_num]
 	end
 
 	
 	!group 
-	!npcme_npc_group = npc_grupTipe['A<<npc_num>>']
-
-	!npcme_npc_rel = npc_rel['A<<npc_num>>']
 	if npcme_npc_rel >= REL_GREAT_VAL:
 		npcme_npc_rel_level = REL_GREAT
 	elseif npcme_npc_rel >= REL_GOOD_VAL:
@@ -571,27 +566,19 @@ if $ARGS[0] = 'start':
 		npcme_npc_rel_level = REL_COLD
 	end
 
-	!npcme_npc_gender = npc_gender['A<<npc_num>>']
-
-	!npcme_c1 = (npc_rel['A<<npc_num>>'] > 0 and npcme_show_unknown_npc = 0) or npcme_show_unknown_npc = 1
-	!npcme_c2 = (npc_QW['A<<npc_num>>'] > 0 and npcme_show_unknown_npc = 0) or npcme_show_unknown_npc = 1
 	npcme_c1 = npcme_npc_rel > 0 or npcme_npc_QW > 0 or npcme_npc_sex > 0
-	!npcme_c1 = npcme_npc_rel > 0
-	!npcme_c2 = npcme_npc_QW > 0
 
 	npcme_c3 = npcme_show_gender[npcme_npc_gender]
 	npcme_c4 = npcme_show_rel[npcme_npc_rel_level]
 	npcme_c5 = npcme_show_group[npcme_npc_group]
-	!npcme_c6 = ($npc_tracked['A<<npc_num>>'] = 1 and npcme_show_tracked = 1) or ($npc_tracked['A<<npc_num>>'] = 0 and npcme_show_untracked = 1)
 	npcme_c6 = (npcme_npc_tracked = 1 and npcme_show_tracked = 1) or (npcme_npc_tracked = 0 and npcme_show_untracked = 1)
 	
 
 	
-	!'<<npcme_c1>> <<npcme_c2>> <<npcme_c3>> <<npcme_c4>> <<npcme_c5>> npc_cnt=<<npc_cnt>>'
 	npcm_in_table[npc_num] = 0
 	
-	!if npc_rel['A<<npc_num>>'] > 0 and npcme_show_gender[npcme_npc_gender] = 1 and npcme_show_rel[npcme_npc_rel_level] = 1 and npcme_show_group[npcme_npc_group] = 1 and (($npc_tracked['A<<npc_num>>'] = 1 and npcme_show_tracked = 1) or ($npc_tracked['A<<npc_num>>'] = 0 and npcme_show_untracked = 1)):
-	if (npcme_c1 or npcme_show_unknown_npc=1) and npcme_c3 and npcme_c4 and npcme_c5 and npcme_c6:
+
+	if (npcme_c1 or npcme_cheat_reveal_all=1) and npcme_c3 and npcme_c4 and npcme_c5 and npcme_c6:
 
 		! filter by name/lastname/nickname
 		$npcme_l_firstname = LCASE($npcme_npc_firstname)
@@ -622,44 +609,57 @@ if $ARGS[0] = 'start':
 
 			! PHOTO
 			if npcme_col_show[npcme_COL_PHOTO] = 1:
-				if npc_num <= npc_cnt:
+				if npc_num <= npcme_npc_cnt:
 					$npcme_table += '<TD><img src="images\characters\shared\headshots_main\<<npc_num>>.jpg"></TD>'
 				else
-					$path = $dynpc_pic[npc_num-npc_cnt-1]
+					$path = $dynpc_pic[npc_num-npcme_npc_cnt-1]
 					$npcme_table += '<TD><img width="100" height="100" src="<<$path>>"></TD>'
-					!$npcme_table += '<TD><<$path>></TD>'
-					!$npcme_table += '<TD><<npc_num-npc_cnt-1-dynpc_lovers_offset>></TD>'
 				end
 			end
 			
 			! FIRST NAME
-			!if npcme_col_show[npcme_COL_NAME] = 1: $npcme_table += "<TD><<$npc_firstname['A<<npc_num>>']>></TD>"
 			if npcme_col_show[npcme_COL_NAME] = 1: $npcme_table += "<TD><<$npcme_npc_firstname>></TD>"
 			
 			! LAST NAME
-			!if npcme_col_show[npcme_COL_LASTNAME] = 1: $npcme_table += "<TD><<$npc_lastname['A<<npc_num>>']>></TD>"
 			if npcme_col_show[npcme_COL_LASTNAME] = 1: $npcme_table += "<TD><<$npcme_npc_lastname>></TD>"
 			
 			! NICKNAME
 			if npcme_col_show[npcme_COL_NICKNAME] = 1:
-				!if $npc_nickname['A<<npc_num>>'] <> '':
 				if $npcme_npc_nickname <> '':
-					!$npcme_table += "<TD>'<<$npc_nickname['A<<npc_num>>']>>'</TD>"
 					$npcme_table += "<TD>'<<$npcme_npc_nickname>>'</TD>"
 				else
 					$npcme_table += "<TD></TD>"
 				end
 			end
+
+			! CUSTOMNAME (name in list)
+			if npcme_col_show[npcme_COL_CUSTOMNAME] = 1:
+				if $npcme_npc_customname <> '':
+					$npcme_table += "<TD><<$npcme_npc_customname>><br>"
+				else
+					$npcme_table += "<TD><<$npcme_npc_usedname>><br>"
+				end
+				
+				if npc_num <= npcme_npc_cnt:
+					!$npcme_table += '<a href="exec:$npc_customname[''A<<npc_num>>'']=input('''') & gt ''npcmenu'',''start''">Change</a><br>'
+					!$npcme_table += '<a href="exec:$npc_customname[''A<<npc_num>>'']='''' & gt ''npcmenu'',''start''">Default</a>'
+					$npcme_table += '<a href="exec:$npc_customname[''A<<npc_num>>'']=input('''') & gt ''npcmenu'',''start''">Set</a>|'
+					$npcme_table += '<a href="exec:$npc_customname[''A<<npc_num>>'']='''' & gt ''npcmenu'',''start''">Default</a>'
+				else
+					!$npcme_table += '<a href="exec:$dynpc_customname[<<dynpc_num>>]=input('''') & gt ''npcmenu'',''start''">Change</a><br>'
+					!$npcme_table += '<a href="exec:$dynpc_customname[<<dynpc_num>>]='''' & gt ''npcmenu'',''start''">Default</a>'
+					$npcme_table += '<a href="exec:$dynpc_customname[<<dynpc_num>>]=input('''') & gt ''npcmenu'',''start''">Set</a>|'
+					$npcme_table += '<a href="exec:$dynpc_customname[<<dynpc_num>>]='''' & gt ''npcmenu'',''start''">Default</a>'
+				end
+				$npcme_table += "</TD>"
+			end
 			
 			! RELATIONSHIP
-			!if npcme_col_show[npcme_COL_RELATION] = 1: $npcme_table += "<TD><<npc_rel['A<<npc_num>>']>></TD>"
 			if npcme_col_show[npcme_COL_RELATION] = 1: $npcme_table += "<TD><<npcme_npc_rel>></TD>"
 			
 			! QUEST STAGE
 			if npcme_col_show[npcme_COL_QUEST_STAGE] = 1:
-				!if npc_QW['A<<npc_num>>'] > 0:
 				if npcme_npc_QW > 0:
-					!$npcme_table += "<TD><<npc_QW['A<<npc_num>>']>></TD>"
 					$npcme_table += "<TD><<npcme_npc_QW>></TD>"
 				else
 					$npcme_table += "<TD>none</TD>"
@@ -667,9 +667,6 @@ if $ARGS[0] = 'start':
 			end
 			
 			! BIRTHDATE & AGE
-			!npcme_currnpc_year  = mid(npc_dob['A<<npc_num>>'], 1, 4)
-			!npcme_currnpc_month = mid(npc_dob['A<<npc_num>>'], 5, 2)
-			!npcme_currnpc_day   = mid(npc_dob['A<<npc_num>>'], 7, 2)
 			npcme_currnpc_year  = mid(npcme_npc_dob, 1, 4)
 			npcme_currnpc_month = mid(npcme_npc_dob, 5, 2)
 			npcme_currnpc_day   = mid(npcme_npc_dob, 7, 2)
@@ -687,9 +684,7 @@ if $ARGS[0] = 'start':
 
 			! SEXTIMES
 			if npcme_col_show[npcme_COL_SEXTIMES] = 1:
-				!if npc_sex['A<<npc_num>>'] > 0 :
 				if npcme_npc_sex > 0 :
-					!$npcme_table += "<TD><<npc_sex['A<<npc_num>>']>></TD>"
 					$npcme_table += "<TD><<npcme_npc_sex>></TD>"
 				else 
 					$npcme_table += "<TD>never</TD>"
@@ -701,18 +696,13 @@ if $ARGS[0] = 'start':
 				! Sveta knows bust size of any girl and
 				! knows dick size of man she had sex with
 				$npcme_table += "<TD>"
-				!if npc_sex['A<<npc_num>>'] > 0:
-				if npcme_npc_sex > 0:
-					!if npc_dick['A<<npc_num>>'] > 0: $npcme_table += '<center><<npc_dick[''A<<npc_num>>'']>> cm</center>'
+				if npcme_npc_sex > 0 or npcme_cheat_reveal_all = 1:
 					if npcme_npc_dick > 0: $npcme_table += '<center><<npcme_npc_dick>> cm</center>'
 				else
-					!if npc_dick['A<<npc_num>>'] > 0: $npcme_table += '<center>?</center>'
 					if npcme_npc_dick > 0: $npcme_table += '<center>?</center>'
 				end
 				
-				!if npc_bust['A<<npc_num>>'] > 0:
 				if npcme_npc_bust > 0:
-					!gs 'npcmenu', 'tits_info', npc_bust['A<<npc_num>>']
 					gs 'npcmenu', 'tits_info', npcme_npc_bust
 					$npcme_table += '<a href="exec:view ''images/pc/body/tits/t<<npcme_tits>>.jpg''"><center><<$npcme_titsize>></center></a>'
 				end
@@ -720,9 +710,8 @@ if $ARGS[0] = 'start':
 			end
 			
 			! INFO
-			!if npcme_col_show[npcme_COL_NOTES] = 1: $npcme_table += "<TD><<$npc_notes['A<<npc_num>>']>></TD>"
 			if npcme_col_show[npcme_COL_NOTES] = 1:
-				if npc_num <= npc_cnt:
+				if npc_num <= npcme_npc_cnt:
 					$npcme_table += "<TD><<$npc_notes['A<<npc_num>>']>></TD>"
 				else
 					$npcme_table += "<TD><<$dynpc_notes[dynpc_num]>></TD>"
@@ -731,21 +720,17 @@ if $ARGS[0] = 'start':
 
 			! TRACK (show npc in stats panel)
 			if npcme_col_show[npcme_COL_TRACK] = 1: 
-				!if $npc_tracked['A<<npc_num>>'] = 1:
 				
 				if npcme_npc_tracked = 1:
-					!$npcme_table += '<TD><a href="exec:$npc_tracked[''A<<npc_num>>'']=0 & gt ''npcmenu'',''start''"><font color="green">YES</color></a></TD>'
-					if npc_num <= npc_cnt:
+					if npc_num <= npcme_npc_cnt:
 						$npcme_table += '<TD><a href="exec:npc_tracked[''A<<npc_num>>'']=0 & gt ''npcmenu'',''start''"><font color="green">YES</color></a></TD>'
 					else
-						!$npcme_table += '<TD><a href="exec:dynpc_tracked[dynpc_num]=0 & gt ''npcmenu'',''start''"><font color="green">YES</color></a></TD>'
 						$npcme_table += '<TD><a href="exec:gs ''npcmenu'',''dynpc_untrack'',<<dynpc_num>> & gt ''npcmenu'',''start''"><font color="green">YES</color></a></TD>'
 					end
 				else
-					if npc_num <= npc_cnt:
+					if npc_num <= npcme_npc_cnt:
 						$npcme_table += '<TD><a href="exec:npc_tracked[''A<<npc_num>>'']=1 & gt ''npcmenu'',''start''"><font color="red">NO</color></a></TD>'
 					else
-						!$npcme_table += '<TD><a href="exec:dynpc_tracked[dynpc_num]=1 & gt ''npcmenu'',''start''"><font color="red">NO</color></a></TD>'
 						$npcme_table += '<TD><a href="exec:gs ''npcmenu'',''dynpc_track'',<<dynpc_num>> & gt ''npcmenu'',''start''"><font color="red">NO</color></a></TD>'
 					end
 				end
@@ -759,43 +744,29 @@ if $ARGS[0] = 'start':
 			npcme_index += 1
 		end
 	end
-	
-	!{
-	!if $npc_tracked['A<<npc_num>>'] = 1:
-	if npcme_npc_tracked = 1:
-		npcme_tracked_npcs[npcme_tracked_npcs_cnt] = npc_num
-		npcme_tracked_npcs_cnt += 1
-	end
-	}
 			
 	npc_num_1 += 1
-	!if npc_num <= npc_cnt: jump 'next_npc'
 	if npc_num_1 <= npc_total_cnt: jump 'next_npc'
 	
-	
-	!if $npc_table_stat <> '': $npc_table_stat = '<TR><TD><a href="exec:gt ''npcmenu''">...</a></TD>' + $npc_table_stat
 	! </FILL NPCS TABLE>
 
 	! Show npcs table
 	'<BR><TABLE BORDER=1><<$npcme_table>></TABLE>'
 	
 	gs 'npcmenu', 'update_table'
+	
+	! restore global variables
+	colnum  = npcme_stored_colnum
+	grpnum  = npcme_stored_grpnum
+	npc_num = npcme_stored_npc_num
+	
 
 	if npcme_exit = 1:
-		gt 'npcmenu', 'ex1t'
+		gt 'npcmenu', 'exit'
 	else
-		act 'Exit the menu': gt 'npcmenu', 'ex1t'
+		act 'Exit the menu': gt 'npcmenu', 'exit'
 	end
-	
-	!{
-	if $menu_loc = 'pav_disco_coolkids':
-		! disco bug fix
-		act 'Exit the menu': gs 'npcmenu', 'ex1t' & gt 'pav_disco', ''
-	else
-		!act 'Exit the menu': input("<<$menu_loc>>, <<$menu_arg>>") & gs 'npcmenu', 'ex1t' & gt $menu_loc, $menu_arg
-		act 'Exit the menu': gs 'npcmenu', 'ex1t' & gt $menu_loc, $menu_arg
-	end
-	}
+
 end
 !-------------------------------------------------------------------------------
 
@@ -809,7 +780,7 @@ if $ARGS[0] = 'track_all':
 	!if npc_rel['A<<npcme1_npc_num>>'] > 0: 
 	if npcm_in_table[npcme1_npc_num] = 1: npc_tracked['A<<npcme1_npc_num>>'] = 1
 	npcme1_npc_num += 1
-	if npcme1_npc_num <= npc_cnt: jump 'next_npc'
+	if npcme1_npc_num <= npcme_npc_cnt: jump 'next_npc'
 end
 !-------------------------------------------------------------------------------
 
@@ -819,7 +790,7 @@ if $ARGS[0] = 'track_none':
 	:next_npc
 	if npcm_in_table[npcme2_npc_num] = 1: npc_tracked['A<<npcme2_npc_num>>'] = 0
 	npcme2_npc_num += 1
-	if npcme2_npc_num <= npc_cnt: jump 'next_npc'
+	if npcme2_npc_num <= npcme_npc_cnt: jump 'next_npc'
 end
 !-------------------------------------------------------------------------------
 
@@ -868,14 +839,11 @@ if $ARGS[0] = 'update_table':
 	
 	gs 'npcmenu', 'update_dynpc_table'
 	
-	npc_total_cnt = npc_cnt + dynpc_cnt
+	npc_total_cnt = npcme_npc_cnt + dynpc_cnt
 	
-	!$npc_table_stat = ''
 	if npc_table_stat_colcnt > 0: $npc_table_stat = '<TR><TD><a href="exec:gt ''npcmenu''">...</a></TD>'
 	
 	npcme7_colnum = 1
-	
-	!input('<<npc_total_cnt>> <<npcme_tracked_npcs_cnt>>')
 	
 	if npcme_tracked_npcs_cnt = 0: jump 'end'
 	npcme7_i = 0
@@ -884,23 +852,22 @@ if $ARGS[0] = 'update_table':
 	npcme7_npc_num = npcme_tracked_npcs[npcme7_i]
 
 	npcme7_npc_group = npc_grupTipe['A<<npcme7_npc_num>>']
-	$npcme7_npc_usedname = $npc_usedname['A<<npcme7_npc_num>>']
+	
+	$npcme7_npc_customname = $npc_customname['A<<npcme7_npc_num>>']
+	if $npcme7_npc_customname ! '':
+		$npcme7_npc_usedname = $npcme7_npc_customname
+	else
+		$npcme7_npc_usedname = $npc_usedname['A<<npcme7_npc_num>>']
+	end
+	
 	npcme7_npc_rel = npc_rel['A<<npcme7_npc_num>>']
 	if npcme7_npc_rel = 0: npcme7_npc_rel = npc_QW['A<<npcme7_npc_num>>']
 	if npcme7_npc_rel = 0: npcme7_npc_rel = npc_rel_TMP['A<<npcme7_npc_num>>']
 	
 	if npcme_show_group_colors = 1 and $npcme_group_color[npcme7_npc_group] <> '':
 		$npc_table_stat += "<TD><<npcme7_npc_rel>> <font color='<<$npcme_group_color[npcme7_npc_group]>>'><<$npcme7_npc_usedname>></font></TD>"
-		!$npc_table_stat += "<TD><font color='<<$npcme_group_color[npcme7_npc_group]>>'><<$npcme7_npc_usedname>></font> <<npcme7_npc_rel>></TD>"
-		
-		!$npc_table_stat += "<TD><font color='<<$npcme_group_color[npcme7_npc_group]>>'><<$npcme7_npc_usedname>></font></TD>"
-		!$npc_table_stat += "<TD><<npcme7_npc_rel>></TD>"
 	else
 		$npc_table_stat += "<TD><<npcme7_npc_rel>> <<$npcme7_npc_usedname>></TD>"
-		!$npc_table_stat += "<TD><<$npcme7_npc_usedname>>: <<npcme7_npc_rel>></TD>"
-		
-		!$npc_table_stat += "<TD><<$npcme7_npc_usedname>></TD>"
-		!$npc_table_stat += "<TD><<npcme7_npc_rel>></TD>"
 	end
 
 	npcme7_colnum += 1
@@ -920,24 +887,23 @@ if $ARGS[0] = 'update_table':
 	
 	npcme7_dynpc_num = npcme_tracked_dynpcs[npcme7_i]
 
-	!npcme7_dynpc_num = npcme7_npc_num - npc_cnt - 1
+	!npcme7_dynpc_num = npcme7_npc_num - npcme_npc_cnt - 1
 	npcme7_npc_group = dynpc_grupTipe[npcme7_dynpc_num]
-	$npcme7_npc_usedname = $dynpc_usedname[npcme7_dynpc_num]
+	
+	$npcme7_npc_customname = $dynpc_customname[npcme7_dynpc_num]
+	if $npcme7_npc_customname ! '':
+		$npcme7_npc_usedname = $npcme7_npc_customname
+	else
+		$npcme7_npc_usedname = $dynpc_usedname[npcme7_dynpc_num]
+	end
+	
 	npcme7_npc_rel = dynpc_rel[npcme7_dynpc_num]
 	if npcme7_npc_rel = 0: npcme7_npc_rel = dynpc_QW[npcme7_dynpc_num]
 	
 	if npcme_show_group_colors = 1 and $npcme_group_color[npcme7_npc_group] <> '':
 		$npc_table_stat += "<TD><<npcme7_npc_rel>> <font color='<<$npcme_group_color[npcme7_npc_group]>>'><<$npcme7_npc_usedname>></font></TD>"
-		!$npc_table_stat += "<TD><font color='<<$npcme_group_color[npcme7_npc_group]>>'><<$npcme7_npc_usedname>></font> <<npcme7_npc_rel>></TD>"
-		
-		!$npc_table_stat += "<TD><font color='<<$npcme_group_color[npcme7_npc_group]>>'><<$npcme7_npc_usedname>></font></TD>"
-		!$npc_table_stat += "<TD><<npcme7_npc_rel>></TD>"
 	else
 		$npc_table_stat += "<TD><<npcme7_npc_rel>> <<$npcme7_npc_usedname>></TD>"
-		!$npc_table_stat += "<TD><<$npcme7_npc_usedname>>: <<npcme7_npc_rel>></TD>"
-		
-		!$npc_table_stat += "<TD><<$npcme7_npc_usedname>></TD>"
-		!$npc_table_stat += "<TD><<npcme7_npc_rel>></TD>"
 	end
 
 	npcme7_colnum += 1
@@ -949,9 +915,8 @@ if $ARGS[0] = 'update_table':
 	if npcme7_i < npcme_tracked_dynpcs_cnt: jump 'next_npc_1'
 	:end_1
 	
-	!if npc_table_stat_colcnt > 0: $npc_table_stat += '<TR><TD><a href="exec:gt ''npcmenu''">...</a></TD>'
-	
 end
+!-------------------------------------------------------------------------------
 
 ! [8]
 if $ARGS[0] = 'tits_info':
@@ -993,6 +958,7 @@ if $ARGS[0] = 'tits_info':
 		$npcme_titsize = 'K cup'
 	end
 end
+!-------------------------------------------------------------------------------
 
 ! [9]
 if $ARGS[0] = 'clear_group_colors':
@@ -1011,6 +977,7 @@ if $ARGS[0] = 'default_group_colors':
 	npcme10_grpnum += 1
 	if npcme10_grpnum < groups_count: jump 'next_group'
 end
+!-------------------------------------------------------------------------------
 
 ! [11]
 if $ARGS[0] = 'dynpc_track':
@@ -1019,7 +986,6 @@ if $ARGS[0] = 'dynpc_track':
 	if npcme11_dynpc_num < dynpc_lovers_offset:
 		dynpc_tracked[npcme11_dynpc_num] = 1
 	else
-		!input("dynpc_lovers_offset=<<dynpc_lovers_offset>> dynpc_cnt=<<dynpc_cnt>>")
 		npcme11_dynpc_num = dynpc_lovers_offset
 		npcme11_lover_num = 0
 		:next_npc
@@ -1028,10 +994,9 @@ if $ARGS[0] = 'dynpc_track':
 		npcme11_lover_num += 1
 		! track up to 3 lovers
 		if npcme11_lover_num < 3: jump 'next_npc'
-		!if npcme11_lover_num < npcme_lover_count: jump 'next_npc'
-		!if npcme11_dynpc_num < dynpc_cnt: jump 'next_npc'
 	end
 end
+!-------------------------------------------------------------------------------
 
 ! [12]
 if $ARGS[0] = 'dynpc_untrack':
@@ -1048,12 +1013,9 @@ if $ARGS[0] = 'dynpc_untrack':
 		npcme12_lover_num += 1
 		! untrack up to 3 lovers
 		if npcme12_lover_num < 3: jump 'next_npc'
-		!if npcme12_lover_num < npcme_lover_count: jump 'next_npc'
-		!if npcme12_dynpc_num < dynpc_cnt: jump 'next_npc'
-		
-		
 	end
 end
+!-------------------------------------------------------------------------------
 
 ! [13]
 if $ARGS[0] = 'update_dynpc_table':
@@ -1100,41 +1062,6 @@ if $ARGS[0] = 'update_dynpc_table':
 	dynpc_rel[dynpc_cnt]        = masha
 	dynpc_gender[dynpc_cnt]     = GENDER_FEMALE
 	dynpc_cnt += 1
-	!{
-	$dynpc_firstname[dynpc_cnt] = 'Andrew'
-	$dynpc_usedname[dynpc_cnt]  = 'Hunter Andrew'
-	dynpc_QW[dynpc_cnt]         = huntersAndreiQw
-	dynpc_gender[dynpc_cnt]     = GENDER_MALE
-	$dynpc_notes[dynpc_cnt]     = 'Hunter'
-	dynpc_cnt += 1
-	!
-	$dynpc_firstname[dynpc_cnt] = 'Sergei'
-	$dynpc_usedname[dynpc_cnt]  = 'Hunter Sergei'
-	dynpc_QW[dynpc_cnt]         = huntersSergeiQw
-	dynpc_gender[dynpc_cnt]     = GENDER_MALE
-	$dynpc_notes[dynpc_cnt]     = 'Hunter'
-	dynpc_cnt += 1
-	!
-	$dynpc_firstname[dynpc_cnt] = 'Igor'
-	$dynpc_usedname[dynpc_cnt]  = 'Hunter Igor'
-	dynpc_QW[dynpc_cnt]         = huntersIgorQw
-	dynpc_gender[dynpc_cnt]     = GENDER_MALE
-	$dynpc_notes[dynpc_cnt]     = 'Hunter'
-	dynpc_cnt += 1
-	}
-	!{
-	grpnum = 1
-	:next_group
-	$dynpc_firstname[dynpc_cnt] = '<<$group_name[grpnum]>>'
-	!$dynpc_usedname[dynpc_cnt]  = '<font color=''<<$npcme_group_color>>''><<$group_name[grpnum]>></font>'
-	$dynpc_usedname[dynpc_cnt]  = '<<$group_name[grpnum]>>'
-	dynpc_rel[dynpc_cnt]        = iif(grupvalue[grpnum]>0,grupvalue[grpnum],1)
-	dynpc_gender[dynpc_cnt]     = GENDER_MALE
-	$dynpc_notes[dynpc_cnt]     = 'Reputation with group'
-	dynpc_cnt += 1	
-	grpnum += 1
-	if grpnum < groups_count: jump 'next_group'	
-	}
 	!
 	dynpc_lovers_offset = dynpc_cnt
 	npcme_lover_num = 0
@@ -1150,10 +1077,6 @@ if $ARGS[0] = 'update_dynpc_table':
 	else
 		npcme_lover_count = 0
 	end
-
-	!if pcs_lovers[0] = 1: npcme_lover_count += 1
-	!if pcs_lovers[1] = 1: npcme_lover_count += 1
-	!if pcs_lovers[2] = 1: npcme_lover_count += 1
 	
 	if npcme_lover_count = 0: jump 'end'
 	:next_lover
@@ -1169,20 +1092,16 @@ if $ARGS[0] = 'update_dynpc_table':
 	$dynpc_pic[dynpc_cnt]       = 'images/characters/shared/headshots_generic/'+lover_picture[npcme_lover_num]+'.jpg'
 	dynpc_sex[dynpc_cnt]        = boyonce[npcme_lover_num]
 	if dynpc_gender[dynpc_cnt] = GENDER_MALE:
-	
 		$dynpc_notes[dynpc_cnt]     = 'Boyfriend<br><a href="exec:npcme_curloverrel = loverrelation[<<npcme_lover_num>>] & lover_number = <<npcme_lover_num>> & *clr & cla & gs ''lover_likes'', ''allPref'' & loverrelation[<<npcme_lover_num>>] = npcme_curloverrel & act ''Hang up.'': gt ''npcmenu'', ''start''">Call him and ask how he thinks you look?</a>'
-		!$dynpc_notes[dynpc_cnt]     = 'Boyfriend<br><a href="exec:lover_number = <<npcme_lover_num>> & *clr & cla & gs ''lover_likes'', ''allPref'' & act ''Hang up.'': gt ''npcmenu'', ''start''">Call him and ask how he thinks you look?</a>'
 	else
 		$dynpc_notes[dynpc_cnt]     = 'Girlfriend<br><a href="exec:npcme_curloverrel = loverrelation[<<npcme_lover_num>>] & lover_number = <<npcme_lover_num>> & *clr & cla & gs ''lover_likes'', ''allPref'' & loverrelation[<<npcme_lover_num>>] = npcme_curloverrel & act ''Hang up.'': gt ''npcmenu'', ''start''">Call him and ask how he thinks you look?</a>'
-		!$dynpc_notes[dynpc_cnt]     = 'Girlfriend<br><a href="exec:lover_number = <<npcme_lover_num>> & *clr & cla & gs ''lover_likes'', ''allPref'' & act ''Hang up.'': gt ''npcmenu'', ''start''">Call him and ask how he thinks you look?</a>'
 	end
 	dynpc_cnt += 1
 	npcme_lover_num += 1
 	if npcme_lover_num < npcme_lover_count: jump 'next_lover'
 	:end
 	
-	!killvar 'npcme_tracked_dynpcs'
-	!killvar 'dynpc_tracked'
+
 	npcme_tracked_dynpcs_cnt = 0
 	npcme13_dynpc_num = 0
 	:next_npc
@@ -1194,35 +1113,82 @@ if $ARGS[0] = 'update_dynpc_table':
 	if npcme13_dynpc_num < dynpc_cnt: jump 'next_npc'
 	
 end
+!-------------------------------------------------------------------------------
 
 ! [14]
-if $ARGS[0] = 'add_npcs_sorted_by_groups':
-	npcme14_groupnum = ARGS[1]
-	npcme14_npc_num = 1
-	:next_npc
-	if npc_grupTipe['A<<npcme14_npc_num>>'] = npcme14_groupnum:
-		npcme_npcs_sorted_by_groups[npcme_npcs_sorted_by_groups_cnt+1] = npcme14_npc_num
-		npcme_npcs_sorted_by_groups_cnt += 1
-	end
-	npcme14_npc_num += 1
-	if npcme14_npc_num <= npc_cnt: jump 'next_npc'
+if $ARGS[0] = 'sort_npcs_by_group':
+
+	killvar 'npcme_npcs_sorted'
+	npcme_npcs_sorted_cnt = 0
+	gs 'npcmenu', 'add_npcs_of_group', GRP_COOLKIDS
+	gs 'npcmenu', 'add_npcs_of_group', GRP_JOCKS
+	gs 'npcmenu', 'add_npcs_of_group', GRP_NERDS
+	gs 'npcmenu', 'add_npcs_of_group', GRP_GOPNIKS
+	gs 'npcmenu', 'add_npcs_of_group', GRP_OUTCASTS
+	gs 'npcmenu', 'add_npcs_of_group', GRP_TEACHERS
+	gs 'npcmenu', 'add_npcs_of_group', GRP_FAMILY
+	gs 'npcmenu', 'add_npcs_of_group', GRP_FRIENDS
+	gs 'npcmenu', 'add_npcs_of_group', GRP_OTHERS
 end
+!-------------------------------------------------------------------------------
 
 ! [15]
 if $ARGS[0] = 'save_preset':
-	! ?killvar 'npcme_npc_tracked_preset<<ARGS[1]>>'
-	! ?killvar 'npcme_dynpc_tracked_preset<<ARGS[1]>>'
-	
 	COPYARR 'npcme_npc_tracked_preset<<ARGS[1]>>', 'npc_tracked'
 	COPYARR 'npcme_dynpc_tracked_preset<<ARGS[1]>>', 'dynpc_tracked'
 end
+!-------------------------------------------------------------------------------
 
 ! [16]
 if $ARGS[0] = 'load_preset':
-	! ?killvar 'npc_tracked'
-	! ?killvar COPYARR 'dynpc_tracked'
-	
 	COPYARR 'npc_tracked', 'npcme_npc_tracked_preset<<ARGS[1]>>'
 	COPYARR 'dynpc_tracked', 'npcme_dynpc_tracked_preset<<ARGS[1]>>'
 end
+!-------------------------------------------------------------------------------
 
+! [17]
+if $ARGS[0] = 'show_genders_all':
+	npcme17_gennum = 0
+	:next_gen
+	npcme_show_gender[npcme17_gennum] = 1
+	npcme17_gennum += 1
+	if npcme17_gennum < GENDER_CNT: jump 'next_gen'
+end
+!-------------------------------------------------------------------------------
+
+! [18]
+if $ARGS[0] = 'show_genders_none':
+	npcme18_gennum = 0
+	:next_gen
+		npcme_show_gender[npcme18_gennum] = 0
+		npcme18_gennum += 1
+	if npcme18_gennum < GENDER_CNT: jump 'next_gen'
+end
+!-------------------------------------------------------------------------------
+
+! [19]
+if $ARGS[0] = 'sort_npcs_by_baseid':
+	killvar 'npcme_npcs_sorted'
+	npcme_npcs_sorted_cnt = 0
+	npcme19_npc_num = 1
+	:next_npc
+	npcme_npcs_sorted[npcme_npcs_sorted_cnt+1] = npcme19_npc_num
+	npcme_npcs_sorted_cnt += 1
+	npcme19_npc_num += 1
+	if npcme19_npc_num <= npcme_npc_cnt: jump 'next_npc'
+end
+!-------------------------------------------------------------------------------
+
+! [20]
+if $ARGS[0] = 'add_npcs_of_group':
+	npcme20_groupnum = ARGS[1]
+	npcme20_npc_num = 1
+	:next_npc
+	if npc_grupTipe['A<<npcme20_npc_num>>'] = npcme20_groupnum:
+		npcme_npcs_sorted[npcme_npcs_sorted_cnt+1] = npcme20_npc_num
+		npcme_npcs_sorted_cnt += 1
+	end
+	npcme20_npc_num += 1
+	if npcme20_npc_num <= npcme_npc_cnt: jump 'next_npc'
+end
+!-------------------------------------------------------------------------------
