@@ -1762,7 +1762,8 @@ else
 	st_count=0
 	$show_table=''
 
-	gs 'show_table', '<a href="exec:if menu_off = 0: menu_off = 1 & $npcme_loc=<<CURLOC>> & gs ''npcmenu''">...</a>','2'
+	gs 'show_table', '<a href="exec:gs ''npcmenu''">...</a>','2'
+	!gs 'show_table', '<a href="exec:if menu_off = 0: menu_off = 1 & $npcme_loc=<<CURLOC>> & gs ''npcmenu''">...</a>','2'
 	
 	if npcme_tracked_npcs_cnt > 0 or npcme_tracked_dynpcs_cnt > 0:
 		gs 'npcmenu', 'update_table'
